@@ -1,0 +1,10 @@
+services:
+  minibox:
+    build: .
+    container_name: minibox
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8765:8765"   # 只允许本机访问；想让局域网访问改成 "8765:8765"
+    volumes:
+      - ./files:/files          # 把这里换成你想管理的文件夹
+      - ./data:/data

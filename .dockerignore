@@ -1,0 +1,6 @@
+.venv
+.cache
+__pycache__
+files
+data
+minibox.json

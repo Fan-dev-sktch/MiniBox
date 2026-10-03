@@ -1,0 +1,10 @@
+flask>=3.0
+waitress>=3.0
+pillow>=11.0
+pillow-heif>=0.18
+pypdfium2>=4.30
+py7zr>=0.21
+rarfile>=4.2
+send2trash>=1.8
+imageio-ffmpeg>=0.5
+mutagen>=1.47
