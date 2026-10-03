@@ -1,0 +1,1928 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiniBox</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='7' width='26' height='20' rx='4' fill='%230f766e'/%3E%3Crect x='3' y='5' width='26' height='7' rx='3' fill='%2314b8a6'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#ffffff; --side:#f5f6f5; --panel:#ffffff; --sunken:#f1f3f2; --line:#e9ecea; --line2:#d9dedb;
+  --ink:#1b1f1d; --ink2:#59605c; --ink3:#8b928e;
+  --acc:#0f766e; --acc-ink:#ffffff; --acc-soft:#e3f2ef; --sel:#e8f3f1;
+  --danger:#c2410c; --ok:#15803d;
+  --k-image:#7c3aed; --k-video:#db2777; --k-audio:#ea580c; --k-pdf:#dc2626; --k-doc:#2563eb; --k-archive:#a16207; --k-other:#64748b; --k-dir:#0f766e;
+  --shadow:0 10px 30px -10px rgba(20,20,10,.18), 0 2px 6px rgba(20,20,10,.06);
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#181a19; --side:#141615; --panel:#1f2221; --sunken:#252928; --line:#2b2f2d; --line2:#3a3f3d;
+  --ink:#e9ecea; --ink2:#a5aca8; --ink3:#767d79;
+  --acc:#2dd4bf; --acc-ink:#062b27; --acc-soft:#183330; --sel:#1b2f2c;
+  --danger:#fb923c; --ok:#4ade80;
+  --k-image:#a78bfa; --k-video:#f472b6; --k-audio:#fb923c; --k-pdf:#f87171; --k-doc:#60a5fa; --k-archive:#facc15; --k-other:#94a3b8; --k-dir:#2dd4bf;
+  --shadow:0 10px 30px -10px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --bg:#181a19; --side:#141615; --panel:#1f2221; --sunken:#252928; --line:#2b2f2d; --line2:#3a3f3d;
+  --ink:#e9ecea; --ink2:#a5aca8; --ink3:#767d79;
+  --acc:#2dd4bf; --acc-ink:#062b27; --acc-soft:#183330; --sel:#1b2f2c;
+  --danger:#fb923c; --ok:#4ade80;
+  --k-image:#a78bfa; --k-video:#f472b6; --k-audio:#fb923c; --k-pdf:#f87171; --k-doc:#60a5fa; --k-archive:#facc15; --k-other:#94a3b8; --k-dir:#2dd4bf;
+  --shadow:0 10px 30px -10px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,"Microsoft YaHei UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 0}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+::selection{background:var(--acc-soft)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{display:flex;flex-direction:column;height:100vh}
+.hd{display:flex;align-items:center;gap:18px;padding:12px 24px;border-bottom:1px solid var(--line)}
+.hd .brand{padding:0;font-size:15px}
+.tabs{display:flex;gap:4px;margin:0 auto;background:var(--sunken);padding:3px;border-radius:10px}
+.tab{border:0;background:none;padding:6px 22px;border-radius:8px;font-size:14px;color:var(--ink2);display:flex;gap:6px;align-items:center}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--panel);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tab .cnt{font-size:11px;min-width:18px;height:18px;border-radius:9px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;padding:0 5px;font-weight:600}
+.tab .cnt:empty{display:none}
+.icon-btn.ghost{border-color:transparent;background:none}
+.cats{display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.cats button{border:0;background:none;padding:7px 12px;border-radius:8px;color:var(--ink2);font-size:14px;white-space:nowrap}
+.cats button:hover{color:var(--ink);background:var(--sunken)}
+.cats button.on{color:var(--ink);font-weight:600;background:var(--sunken)}
+.cats button.drop{outline:2px dashed var(--acc)}
+/* ---------- sidebar */
+.side{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto;background:var(--side)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.1px;font-size:15px;min-width:120px}
+.brand svg{display:block}
+.side h6{margin:12px 8px 4px;font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.06em}
+.loc{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;color:var(--ink2);border:0;background:none;text-align:left;width:100%}
+.loc:hover{background:var(--sunken);color:var(--ink)}
+.loc.on{background:var(--panel);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.nav{font-size:14.5px;font-weight:600;color:var(--ink);padding:9px 8px}
+.nav svg{opacity:1}
+.nav.on{color:var(--acc)}
+
+.loc svg{flex:none;opacity:.8}
+.loc .x{margin-left:auto;opacity:0;padding:0 4px;border-radius:4px}
+.loc:hover .x{opacity:.6}.loc .x:hover{opacity:1;background:var(--line)}
+.loc.drop{outline:2px dashed var(--acc)}
+.side .spacer{flex:1}
+.tools{font-size:12px;color:var(--ink3);padding:8px;display:grid;gap:4px}
+.tools span{display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line2)}
+.dot.on{background:var(--ok)}
+/* ---------- main */
+.main{display:flex;flex-direction:column;min-width:0;flex:1;min-height:0}
+.top{display:flex;align-items:center;gap:10px;padding:14px 24px 10px}
+.icon-btn.menu-btn{display:none}
+.crumbs{display:flex;align-items:center;gap:2px;min-width:0;flex:1;overflow:hidden;white-space:nowrap;font-size:15px}
+.crumbs button:last-child{font-size:20px}
+.crumbs button{border:0;background:none;padding:4px 6px;border-radius:6px;color:var(--ink2);max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.crumbs button:last-child{color:var(--ink);font-weight:600}
+.crumbs button:hover{background:var(--sunken)}
+.crumbs button.drop{outline:2px dashed var(--acc)}
+.crumbs .sep{color:var(--ink3)}
+.search{position:relative}
+.search input{width:34px;padding:7px 10px 7px 30px;border:1px solid transparent;border-radius:8px;background:none;outline:none;cursor:pointer;transition:width .18s,border-color .18s}
+.search input:hover{background:var(--sunken)}
+.search input:focus,.search input:not(:placeholder-shown){width:190px;border-color:var(--line);background:var(--panel);cursor:text}
+.search input:focus{border-color:var(--acc)}
+.search input::placeholder{color:transparent}.search input:focus::placeholder{color:var(--ink3)}
+.search svg{pointer-events:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+.btn:hover{border-color:var(--line2);background:var(--sunken)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:550}
+.btn.pri:hover{filter:brightness(1.06)}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover{background:var(--sunken)}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:default}
+.icon-btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;width:34px;height:34px;display:inline-grid;place-items:center;color:var(--ink2)}
+.icon-btn:hover{color:var(--ink);background:var(--sunken)}
+.bar2{display:flex;align-items:center;gap:6px;padding:0 24px 6px;flex-wrap:wrap;min-height:4px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 11px;font-size:13px;color:var(--ink2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.bar2 .r{margin-left:auto;display:flex;gap:6px;align-items:center;color:var(--ink3);font-size:12.5px}
+/* ---------- list */
+.listwrap{flex:1;overflow:auto;padding:0 24px 120px;position:relative}
+.list{background:transparent}
+.row:first-child{border-top:0}
+.empty.big{padding:90px 20px;line-height:1.8}
+.empty.big .box{color:var(--acc);display:block;margin:0 auto 6px;width:72px}
+.empty.big .di{width:56px;height:56px;border-radius:16px;background:var(--sunken);color:var(--ink3);display:grid;place-items:center;margin:0 auto 14px}
+.empty.big b{font-size:17px}
+.crumbs:empty{display:none}
+.crumbs .back{color:var(--acc)!important;font-weight:500}
+.crumbs button:last-child{font-size:inherit!important}
+.row{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:14px;padding:8px 12px;border-radius:10px;user-select:none;cursor:default}
+.row:first-child{border-top:0}
+.row.head{position:sticky;top:0;z-index:2;background:var(--bg);font-size:12px;color:var(--ink3);padding-top:9px;padding-bottom:9px}
+.row.head button{border:0;background:none;padding:0;color:inherit;text-align:left;font-size:12px}
+.row.head button.on{color:var(--ink)}
+.row:not(.head):hover{background:var(--sunken)}
+.row.sel{background:var(--sel)!important}
+.row.drop{outline:2px dashed var(--acc);outline-offset:-3px}
+.row.flash{animation:flash 1.6s ease}
+@keyframes flash{0%,40%{background:var(--acc-soft)}}
+.row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sub{display:block;font-size:12px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.row .nm{font-size:14px}
+.row .sz,.row .tm{font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.row .sz{text-align:right}
+.ck{width:16px;height:16px;border:1.5px solid var(--line2);border-radius:4px;display:grid;place-items:center;background:var(--panel)}
+.sel .ck,.ck.on{background:var(--acc);border-color:var(--acc)}
+.sel .ck:after,.ck.on:after{content:"";width:8px;height:4px;border:2px solid var(--acc-ink);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.ck.part{background:var(--acc);border-color:var(--acc)}.ck.part:after{content:"";width:8px;height:2px;background:var(--acc-ink)}
+.ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:9.5px;font-weight:700;letter-spacing:.02em;overflow:hidden;position:relative}
+.ic img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;background:var(--sunken);opacity:0;transition:opacity .15s}
+.ic .lb{position:relative}
+.ic.dir{background:none;color:var(--k-dir)}
+.grid .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;padding:6px 0;background:transparent;border:0}
+.grid .row.head{display:none}
+.grid .row{grid-template-columns:1fr;border:1px solid transparent;border-radius:10px;padding:10px;justify-items:center;text-align:center;gap:6px;position:relative;background:var(--panel)}
+.grid .row .ck{position:absolute;top:8px;left:8px;opacity:0}
+.grid .row:hover .ck,.grid .row.sel .ck{opacity:1}
+.grid .row .ic{width:100%;height:auto;aspect-ratio:4/3;border-radius:10px;font-size:15px}
+.grid .row .ic.dir svg{width:62px;height:62px}
+.grid .row .ic svg{width:34px;height:34px}
+.grid .row .nm{width:100%;font-size:13px}
+.grid .row .sz,.grid .row .tm,.grid .row .sub{display:none}
+.empty{padding:70px 20px;text-align:center;color:var(--ink3);grid-column:1/-1}
+.empty b{display:block;color:var(--ink2);font-weight:550;margin-bottom:4px;font-size:15px}
+.dropzone{position:fixed;inset:0;background:color-mix(in srgb,var(--acc) 12%,transparent);border:3px dashed var(--acc);z-index:50;display:none;place-items:center;font-size:18px;font-weight:600;color:var(--acc);pointer-events:none}
+.dropzone.on{display:grid}
+/* ---------- action bar */
+.actions{position:fixed;left:50%;transform:translate(-50%,20px);bottom:22px;background:var(--ink);color:var(--bg);border-radius:12px;padding:6px;display:flex;gap:2px;align-items:center;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.18s;z-index:20;max-width:calc(100vw - 32px);overflow-x:auto}
+.actions.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.actions .cnt{padding:0 10px 0 8px;font-size:13px;opacity:.75;white-space:nowrap}
+.actions button{border:0;background:none;color:inherit;padding:7px 10px;border-radius:8px;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.actions button:hover{background:color-mix(in srgb,var(--bg) 16%,transparent)}
+.actions .hl{background:var(--acc);color:var(--acc-ink);font-weight:550}
+.actions .hl:hover{background:var(--acc);filter:brightness(1.08)}
+.actions .vr{width:1px;height:20px;background:currentColor;opacity:.2;margin:0 4px}
+/* ---------- jobs */
+.jobs{position:fixed;right:18px;bottom:18px;width:340px;max-height:56vh;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;flex-direction:column;z-index:30;overflow:hidden}
+.jobs.on{display:flex}
+.jobs header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.jobs header .btn{padding:3px 8px;font-size:12px;font-weight:400}
+.jobs .jl{overflow:auto}
+.job{padding:10px 12px;border-top:1px solid var(--line);font-size:13px}
+.job:first-child{border-top:0}
+.job .t{display:flex;gap:8px;align-items:baseline}
+.job .t b{font-weight:550;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job .st{font-size:12px;color:var(--ink3);white-space:nowrap}
+.job .st.ok{color:var(--ok)}.job .st.err{color:var(--danger)}
+.pb{height:4px;background:var(--sunken);border-radius:4px;margin-top:7px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--acc);border-radius:4px;transition:width .3s}
+.job .o{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.job .o button{border:1px solid var(--line);background:var(--sunken);border-radius:6px;padding:2px 7px;font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job .e{margin-top:5px;color:var(--danger);font-size:12px;word-break:break-all}
+.job .x{border:0;background:none;color:var(--ink3);padding:0 2px;font-size:12px}
+.job .x:hover{color:var(--danger)}
+.jobs-fab{position:fixed;right:18px;bottom:18px;z-index:29;display:none}
+.jobs-fab.on{display:inline-flex}
+body.has-sel .jobs-fab{bottom:76px}
+/* ---------- modal */
+.modal{position:fixed;inset:0;background:rgba(10,10,8,.45);display:none;place-items:center;z-index:60;padding:16px}
+.modal.on{display:grid}
+.dlg{background:var(--panel);border-radius:14px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px}
+.dlg h3{margin:0 0 4px;font-size:16px}
+.dlg .muted{color:var(--ink3);font-size:12.5px;margin:0 0 14px}
+.dlg label.f{display:block;font-size:12.5px;color:var(--ink2);margin:14px 0 6px}
+.dlg input[type=text],.dlg input[type=password],.dlg select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);outline:none}
+.dlg input:focus,.dlg select:focus{border-color:var(--acc)}
+.dlg .fmts{display:flex;flex-wrap:wrap;gap:6px}
+.dlg .fmts button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 12px;font-weight:600;font-size:12.5px;min-width:56px}
+.dlg .fmts button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.dlg .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.dlg .seg button{border:0;background:var(--bg);padding:6px 12px;font-size:13px}
+.dlg .seg button+button{border-left:1px solid var(--line)}
+.dlg .seg button.on{background:var(--ink);color:var(--bg)}
+.dlg .rng{display:flex;align-items:center;gap:10px}
+.dlg .rng input{flex:1;accent-color:var(--acc)}
+.dlg .chk{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px}
+.dlg .chk input{accent-color:var(--acc);width:16px;height:16px}
+.dlg .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+.dlg .caps{display:grid;gap:4px;font-size:13px;color:var(--ink3)}.dlg .caps .on{color:var(--ink)}.dlg .caps em{font-style:normal;color:var(--ink3);margin-left:6px;font-size:12px}
+.dlg .note{font-size:12px;color:var(--ink3);margin-top:8px}
+.dlg .tree{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:6px}
+.dlg .tree button{display:flex;width:100%;text-align:left;border:0;background:none;padding:6px 10px;gap:6px;align-items:center}
+.dlg .tree button:hover{background:var(--sunken)}
+.dlg .tree button.on{background:var(--acc-soft)}
+/* ---------- preview */
+.pv{position:fixed;inset:0;background:rgba(8,8,6,.86);z-index:70;display:none;flex-direction:column;color:#eee}
+.pv.on{display:flex}
+.pv header{display:flex;align-items:center;gap:10px;padding:12px 16px}
+.pv header b{flex:1;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv header button{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#eee;border-radius:8px;padding:6px 11px}
+.pv header button:hover{background:rgba(255,255,255,.14)}
+.pv .body{flex:1;display:grid;place-items:center;min-height:0;padding:0 56px 20px;position:relative}
+.pv .body img,.pv .body video{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.pv .body iframe{width:100%;height:100%;border:0;background:#fff;border-radius:6px}
+.pv .body pre{width:min(900px,100%);height:100%;overflow:auto;margin:0;background:#1b1b19;color:#ddd;padding:16px;border-radius:8px;font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all}
+.pv .arc{width:min(700px,100%);height:100%;overflow:auto;background:#1b1b19;border-radius:8px;padding:6px 0;font-size:13px}
+.pv .arc div{display:flex;padding:4px 14px;gap:10px}.pv .arc div span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv .arc div span:last-child{color:#999;font-variant-numeric:tabular-nums}
+.pv .nav{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(255,255,255,.08);color:#fff;width:40px;height:56px;border-radius:8px;font-size:20px}
+.pv .nav:hover{background:rgba(255,255,255,.18)}
+.pv .prev{left:8px}.pv .next{right:8px}
+.pv .na{color:#aaa;text-align:center}
+/* ---------- misc */
+.menu{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:5px;z-index:80;min-width:180px;display:none}
+.menu.on{display:block}
+.menu button{display:flex;width:100%;border:0;background:none;padding:7px 10px;border-radius:6px;text-align:left;gap:8px;align-items:center;font-size:13.5px}
+.menu button:hover{background:var(--sunken)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.menu .danger{color:var(--danger)}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-30px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;box-shadow:var(--shadow);z-index:90;opacity:0;transition:.2s;pointer-events:none;font-size:13.5px;max-width:90vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--danger);color:#fff}
+.rename-in{width:100%;padding:3px 6px;border:1px solid var(--acc);border-radius:6px;background:var(--panel);outline:none}
+
+/* ---------- 导入 */
+.dlg.wide{width:min(720px,100%)}
+.im-f{display:flex;gap:14px;align-items:flex-start;margin-top:12px}
+.im-f>span{flex:none;width:30px;font-size:12.5px;color:var(--ink3);padding-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1}
+.chips button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--ink2);display:inline-flex;gap:5px;align-items:center;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips button:hover{border-color:var(--line2);color:var(--ink)}
+.chips button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chips button[data-zero]{opacity:.45}
+.chips em{font-style:normal;font-size:11.5px;opacity:.6;font-variant-numeric:tabular-nums}
+.im-dates{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink3)}
+.im-dates input{border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:3px 6px;font-size:12.5px}
+.im-list{margin-top:16px;border:1px solid var(--line);border-radius:12px;height:300px;display:flex;flex-direction:column;overflow:hidden}
+.im-h,.im-bh{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.im-bh input{flex:1;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);outline:none;font-size:13px}
+.im-bh input:focus{border-color:var(--acc)}
+.im-drv{display:flex;gap:6px;padding:8px 12px 0}
+.im-warn{margin-left:auto;color:var(--ink3);font-size:12px}
+.ckb{border:0;background:none;padding:2px}
+.im-rows{overflow:auto;flex:1;padding:4px}
+.im-r{display:grid;grid-template-columns:16px 26px minmax(0,1fr) 64px 92px;gap:10px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:5px 8px;border-radius:7px;font-size:13px}
+.im-bh+.im-drv+.im-rows .im-r,.im-bh+.im-rows .im-r{grid-template-columns:26px minmax(0,1fr)}
+.im-r:hover{background:var(--sunken)}
+.im-r.off{opacity:.45}
+.im-r .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.im-r .n em{font-style:normal;color:var(--ink3);font-size:12px;margin-left:8px}
+.im-r .m{color:var(--ink3);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.im-empty{flex:1;display:flex;gap:10px;align-items:center;justify-content:center;color:var(--ink3);font-size:13px;padding:30px;text-align:center}
+.spin{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lk{color:var(--acc);cursor:pointer;font-size:13px;align-self:center;border:0;background:none;padding:0;white-space:nowrap}
+.lk:hover{text-decoration:underline}
+@media (max-width:760px){ .im-r{grid-template-columns:16px 26px minmax(0,1fr) 60px}.im-r .m:last-child{display:none} }
+/* ---------- 缩小体积 / 剪辑 / 页面 */
+.shr{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.shr button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 13px;font-size:13px;color:var(--ink2)}
+.shr button:hover{border-color:var(--line2);color:var(--ink)}
+.shr button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.shr-c{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--bg)}
+.shr-c.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.shr-c input{width:72px;border:0;background:none;padding:5px 4px 5px 12px;font-size:13px;outline:none}
+.shr-c select{border:0;background:none;font-size:13px;padding:0 8px 0 2px;outline:none}
+.cg .fmts button.wide{width:auto;padding:9px 14px}
+.tr-m{margin:0 auto;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:grid;place-items:center;max-height:46vh}
+.tr-m video{width:100%;height:100%;object-fit:contain}
+.tr-m.aud{aspect-ratio:auto;height:120px;background:var(--sunken);color:var(--k-audio)}
+.tr-bar{position:relative;height:34px;margin:16px 8px 6px;cursor:pointer;touch-action:none}
+.tr-bar i{position:absolute;left:0;right:0;top:13px;height:8px;border-radius:4px;background:var(--line)}
+.tr-sel{position:absolute;top:9px;height:16px;background:color-mix(in srgb,var(--acc) 35%,transparent);border-top:2px solid var(--acc);border-bottom:2px solid var(--acc)}
+.tr-h{position:absolute;top:3px;width:14px;height:28px;margin-left:-7px;border-radius:5px;background:var(--acc);cursor:ew-resize;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tr-h:after{content:"";position:absolute;left:6px;top:8px;width:2px;height:12px;background:var(--acc-ink);opacity:.7}
+.tr-bar u{position:absolute;top:0;width:2px;height:34px;background:var(--ink);margin-left:-1px;pointer-events:none}
+.tr-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
+.tr-row label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink3);white-space:nowrap}
+.tr-row input{width:86px!important;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-variant-numeric:tabular-nums;text-align:center;outline:none}
+.tr-row input:focus{border-color:var(--acc)}
+.pg-tb{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--ink2);margin:4px 0 10px}
+.pg-tb .sp{flex:1}.pg-tb .btn{padding:5px 10px}
+.pg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;max-height:52vh;overflow:auto;padding:4px;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:200px}
+.pg{position:relative;border-radius:10px;padding:8px;text-align:center;cursor:pointer;user-select:none;border:1px solid transparent}
+.pg:hover{background:var(--sunken)}
+.pg.on{background:var(--acc-soft);border-color:var(--acc)}
+.pg.drop{outline:2px dashed var(--acc)}
+.pg-im{aspect-ratio:3/4;display:grid;place-items:center;overflow:hidden}
+.pg-im img{max-width:100%;max-height:100%;box-shadow:0 1px 4px rgba(0,0,0,.18);background:#fff;transition:transform .15s}
+.pg span{display:block;font-size:12px;color:var(--ink3);margin-top:6px}
+.pg .ck{position:absolute;top:8px;left:8px;opacity:0}.pg:hover .ck,.pg.on .ck{opacity:1}
+/* ---------- 音乐播放条 */
+.player{display:none;align-items:center;gap:14px;padding:10px 20px;border-top:1px solid var(--line);background:var(--panel);position:relative}
+.player.on{display:flex}
+.player .cv{width:48px;height:48px;border-radius:8px;flex:none;background:linear-gradient(135deg,var(--k-audio),var(--k-image));display:grid;place-items:center;color:#fff;overflow:hidden}
+.player .cv img{width:100%;height:100%;object-fit:cover}
+.player .meta{width:200px;min-width:0;flex:none}
+.player .meta b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px}
+.player .meta span{display:block;font-size:12px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbtn{border:0;background:none;width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;color:var(--ink2);flex:none}
+.pbtn:hover{background:var(--sunken);color:var(--ink)}
+.pbtn.big{width:40px;height:40px;background:var(--ink);color:var(--bg)}
+.pbtn.big:hover{background:var(--ink);opacity:.88;color:var(--bg)}
+.pbtn.on{color:var(--acc)}
+.seek{flex:1;display:flex;align-items:center;gap:10px;min-width:120px;font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:16px;display:flex;align-items:center;cursor:pointer;position:relative}
+.bar i{position:absolute;left:0;right:0;height:4px;border-radius:4px;background:var(--line)}
+.bar b{position:absolute;left:0;height:4px;border-radius:4px;background:var(--acc)}
+.bar u{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--acc);transform:translateX(-6px);opacity:0;transition:opacity .15s}
+.bar:hover u{opacity:1}
+.vol{width:80px;accent-color:var(--acc)}
+.queue{position:absolute;right:16px;bottom:calc(100% + 8px);width:340px;max-height:50vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;padding:6px;z-index:25}
+.queue.on{display:block}
+.queue h5{margin:6px 8px 8px;font-size:12px;color:var(--ink3);font-weight:600}
+.queue button{display:flex;width:100%;border:0;background:none;text-align:left;padding:7px 8px;border-radius:7px;gap:10px;font-size:13px;align-items:center}
+.queue button:hover{background:var(--sunken)}
+.queue button.cur{color:var(--acc);font-weight:600}
+.queue button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.queue button em{font-style:normal;color:var(--ink3);font-size:11.5px;width:18px;text-align:right}
+body.has-player .actions{bottom:92px}
+body.has-player .jobs-fab,body.has-player .jobs{bottom:88px}
+body.has-player.has-sel .jobs-fab{bottom:146px}
+.eq{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.eq i{width:3px;background:currentColor;animation:eq 1s infinite ease-in-out}
+.eq i:nth-child(2){animation-delay:-.4s}.eq i:nth-child(3){animation-delay:-.7s}
+@keyframes eq{0%,100%{height:3px}50%{height:12px}}
+.paused .eq i{animation-play-state:paused}
+.row .playing{color:var(--acc);margin-left:8px;vertical-align:middle}
+/* ---------- 视频播放器 */
+.vp{position:fixed;inset:0;background:#000;z-index:75;display:none;color:#eee}
+.vp.on{display:flex}
+.vp .stage{flex:1;position:relative;display:grid;place-items:center;min-width:0;overflow:hidden}
+.vp video{width:100%;height:100%;object-fit:contain;background:#000}
+.vp video::cue{background:rgba(0,0,0,.55);font-size:clamp(16px,2.4vw,30px);font-family:inherit}
+.vp .top,.vp .ctl{position:absolute;left:0;right:0;transition:opacity .25s;z-index:2}
+.vp .top{top:0;display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(rgba(0,0,0,.65),transparent)}
+.vp .top b{flex:1;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+.vp .ctl{bottom:0;padding:28px 18px 14px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.vp.idle .top,.vp.idle .ctl{opacity:0}
+.vp.idle{cursor:none}
+.vp .row2{display:flex;align-items:center;gap:6px;margin-top:6px}
+.vp .pbtn{color:#ddd}.vp .pbtn:hover{background:rgba(255,255,255,.12);color:#fff}
+.vp .pbtn.big{background:#fff;color:#000}
+.vp .bar i{background:rgba(255,255,255,.25)}.vp .bar s{position:absolute;left:0;height:4px;border-radius:4px;background:rgba(255,255,255,.35)}
+.vp .bar:hover i,.vp .bar:hover b,.vp .bar:hover s{height:6px}
+.vp .tm{font-size:12.5px;font-variant-numeric:tabular-nums;color:#ccc;margin:0 8px}
+.vp .sp{flex:1}
+.vp .tbtn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#eee;border-radius:7px;padding:5px 10px;font-size:12.5px}
+.vp .tbtn:hover{background:rgba(255,255,255,.15)}
+.vp .pop{position:absolute;bottom:64px;right:18px;background:rgba(28,28,26,.96);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:5px;min-width:150px;display:none;z-index:3}
+.vp .pop.on{display:block}
+.vp .pop button{display:block;width:100%;text-align:left;border:0;background:none;color:#eee;padding:7px 10px;border-radius:6px;font-size:13px}
+.vp .pop button:hover{background:rgba(255,255,255,.1)}.vp .pop button.on{color:var(--acc)}
+.vp .side{width:300px;background:#141413;border-left:1px solid #2a2a28;overflow:auto;display:none;padding:8px}
+.vp.list .side{display:block}
+.vp .side h5{margin:8px 8px 10px;font-size:12px;color:#888;font-weight:600}
+.vp .side button{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;color:#ccc;padding:8px;border-radius:7px;font-size:13px;align-items:center}
+.vp .side button:hover{background:#232321}.vp .side button.cur{color:var(--acc);background:#1d2a28}
+.vp .side button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.vp .side button em{font-style:normal;font-size:11.5px;color:#777}
+.vp .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);padding:10px 16px;border-radius:9px;font-size:14px;display:none;z-index:2;text-align:center}
+.vp .msg.on{display:block}
+.vp .osd{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;font-size:13.5px;opacity:0;transition:opacity .2s;z-index:3;pointer-events:none}
+.vp .osd.on{opacity:1}
+.playall{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 11px;font-size:13px;color:var(--acc);display:inline-flex;align-items:center;gap:5px}
+.playall:hover{border-color:var(--acc)}
+
+/* ---------- 视图切换 */
+.view{display:flex;flex-direction:column;flex:1;min-height:0}
+.view[hidden]{display:none}
+.loc .cnt{margin-left:auto;font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.loc .ci{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff;flex:none}
+/* ---------- 资料库首页 */
+.list.homebox{background:none;border:0;display:block!important;padding:0!important}
+.home{padding:4px 0 20px}
+.home .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:12px;cursor:pointer}
+.tile:hover{border-color:var(--line2);background:var(--sunken)}
+.tile.drop{outline:2px dashed var(--acc)}
+.tile .ti{width:40px;height:40px;border-radius:10px;display:grid;place-items:center}
+.tile b{font-size:15px;font-weight:600}
+.tile span{font-size:12.5px;color:var(--ink3)}
+.home .hint{margin:18px 2px 0;color:var(--ink3);font-size:13px;display:flex;gap:8px;align-items:center}
+/* ---------- 格式转换页 */
+.conv{overflow:auto}
+.conv-col{width:min(720px,100%);margin:0 auto;padding:36px 24px 60px;display:flex;flex-direction:column;gap:26px}
+.drop-big{min-height:360px;border:1.5px dashed var(--line2);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink3);text-align:center;padding:40px;cursor:pointer;transition:border-color .15s,background .15s}
+.drop-big:hover,.drop-big.over{border-color:var(--acc);background:var(--acc-soft)}
+.drop-big b{color:var(--ink);font-size:20px;font-weight:600;margin-top:10px}
+.drop-big .links{font-size:14px}
+.drop-big .links a{color:var(--acc);text-decoration:none;cursor:pointer}
+.drop-big .links a:hover{text-decoration:underline}
+.drop-big .hint{font-size:12.5px;margin-top:14px}
+.sec-h{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sec-h h3{margin:0;font-size:15px;font-weight:600}
+.sec-h .n{color:var(--ink3);font-size:13px}
+.sec-h .sp{flex:1}
+.sec-h .lk{border:0;background:none;color:var(--acc);font-size:13px;padding:4px 6px;border-radius:6px}
+.sec-h .lk:hover{background:var(--acc-soft)}
+.sec-h .lk:disabled{color:var(--ink3);background:none}
+.cfl{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cf{display:grid;grid-template-columns:36px minmax(0,1fr) auto 26px;gap:12px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.cf:first-child{border-top:0}
+.cf .ic{width:36px;height:36px}
+.cf .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.cf .m{font-size:12.5px;color:var(--ink3);display:block;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cf .m.err{color:var(--danger)}
+.cf .m.ok{color:var(--ok)}
+.cf .st{font-size:13px;color:var(--ink3);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.cf .st a{color:var(--acc);cursor:pointer;margin-left:10px;text-decoration:none}
+.cf .st a:hover{text-decoration:underline}
+.cf .x{border:0;background:none;color:var(--ink3);border-radius:6px;width:26px;height:26px;font-size:16px}
+.cf .x:hover{background:var(--sunken);color:var(--danger)}
+.cf .pb{grid-column:2/4;margin-top:-4px}
+.cg{padding:0 0 18px}
+.cg+.cg{border-top:1px solid var(--line);padding-top:18px}
+.cg h4{margin:0 0 10px;font-size:13px;font-weight:500;color:var(--ink2)}
+.cg .fmts{display:flex;flex-wrap:wrap;gap:8px}
+.cg .fmts button{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 0;font-weight:600;font-size:13.5px;width:82px;color:var(--ink2)}
+.cg .fmts button:hover{border-color:var(--line2);color:var(--ink)}
+.cg .fmts button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.cg details{margin-top:12px;font-size:13px}
+.cg summary{cursor:pointer;color:var(--ink3);user-select:none;list-style:none;display:inline-flex;gap:4px;align-items:center}
+.cg summary::-webkit-details-marker{display:none}
+.cg summary:before{content:"+";font-weight:600;width:14px;text-align:center}
+.cg details[open] summary:before{content:"−"}
+.cg .opt{margin-top:12px;display:grid;gap:12px;padding:14px;background:var(--sunken);border-radius:12px}
+.cg .opt label{display:block;font-size:12.5px;color:var(--ink2);margin-bottom:5px}
+.cg .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.cg .seg button{border:0;background:var(--bg);padding:5px 11px;font-size:12.5px}
+.cg .seg button+button{border-left:1px solid var(--line)}
+.cg .seg button.on{background:var(--ink);color:var(--bg)}
+.cg .rng{display:flex;gap:10px;align-items:center}.cg .rng input{flex:1;accent-color:var(--acc)}
+.cg .chk{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}.cg .chk input{accent-color:var(--acc)}
+.cg .note{font-size:12px;color:var(--ink3);margin-top:8px}
+.conv-foot{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.conv-foot[hidden]{display:none}
+.conv-foot span{color:var(--ink3);font-size:13px;text-align:center}
+.page-convert .jobs-fab,.page-convert .jobs{display:none!important}
+.btn.big{padding:14px 34px;font-size:15.5px;border-radius:12px;justify-content:center}
+@media (max-width:760px){
+  .hd{padding:10px 14px;gap:10px}.tab{padding:6px 14px}.search input{width:110px}.top{padding:10px 14px;flex-wrap:wrap}.cats{flex-basis:100%;order:-1}.search{flex:1}.search input{width:100%}.row .sz{display:none}
+  .conv-body{grid-template-columns:1fr;overflow:auto}.conv{padding:14px 16px 0}.conv-left{min-height:240px}
+  .player{gap:8px;padding:8px 12px;flex-wrap:wrap}.player .meta{width:auto;flex:1}.player .seek{order:5;flex-basis:100%}.vol,.player .opt{display:none}
+  .vp .side{position:absolute;right:0;top:0;bottom:0;z-index:4}
+  body.has-player .actions{bottom:120px}
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:240px;z-index:40;transform:translateX(-100%);transition:.2s;background:var(--panel);box-shadow:var(--shadow)}
+  .side.on{transform:none}
+  .icon-btn.menu-btn{display:inline-grid}
+  .top{padding:12px 16px 8px}.bar2{padding:0 16px 8px}.listwrap{padding:0 16px 140px}
+  .search{order:5;width:100%}.search input{width:100%}
+  .row .tm,.row.head>:last-child{display:none}
+  .crumbs{order:2;flex-basis:calc(100% - 50px)}
+  .actions{left:50%;max-width:calc(100vw - 24px)}
+  .jobs{left:12px;right:12px;width:auto}
+  .pv .body{padding:0 8px 12px}.pv .nav{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hd">
+    <div class="brand"><svg width="24" height="24" viewBox="0 0 64 64"><rect x="2" y="2" width="60" height="60" rx="15" fill="var(--acc)"/><rect x="13" y="19" width="38" height="31" rx="5" fill="var(--bg)"/><rect x="11" y="15" width="42" height="10" rx="4" fill="var(--bg)" opacity=".75"/><rect x="27" y="30" width="10" height="3.5" rx="1.75" fill="var(--acc)"/></svg>MiniBox</div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" id="navFiles" role="tab">文件</button>
+      <button class="tab" id="navConvert" role="tab">转换<span class="cnt" id="convCnt"></span></button>
+    </nav>
+    <button class="icon-btn ghost" id="settingsBtn" title="设置" aria-label="设置"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </header>
+
+  <main class="main">
+   <div class="view" id="libView">
+    <div class="top">
+      <nav class="cats" id="cats"></nav>
+      <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="搜索" autocomplete="off"></label>
+      <button class="icon-btn ghost" id="moreBtn" title="更多" aria-label="更多"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+      <button class="btn pri" id="upBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>导入</button>
+      <input type="file" id="fileIn" multiple hidden>
+    </div>
+    <div class="bar2">
+      <nav class="crumbs" id="crumbs"></nav>
+      <div id="filters"></div>
+      <div class="r" id="stat"></div>
+    </div>
+    <div class="listwrap" id="wrap">
+      <div class="list" id="list"></div>
+    </div>
+   </div>
+   <div class="view conv" id="convView" hidden>
+    <div class="conv-col">
+      <section id="convLeft"></section>
+      <section id="convRight"></section>
+      <div class="conv-foot"><button class="btn pri big" id="convGo">开始转换</button><span id="convSum"></span></div>
+    </div>
+    <input type="file" id="convIn" multiple hidden>
+   </div>
+    <div class="player" id="player">
+      <div class="cv" id="mpCover"></div>
+      <div class="meta"><b id="mpTitle"></b><span id="mpArtist"></span></div>
+      <button class="pbtn" data-mp="prev" title="上一首"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="pbtn big" data-mp="toggle" id="mpPlay" title="播放/暂停 (空格)"></button>
+      <button class="pbtn" data-mp="next" title="下一首"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <div class="seek"><span id="mpCur">0:00</span><div class="bar" id="mpBar"><i></i><b></b><u></u></div><span id="mpDur">0:00</span></div>
+      <button class="pbtn opt" data-mp="mode" id="mpMode" title="播放模式"></button>
+      <input type="range" class="vol" id="mpVol" min="0" max="1" step="0.01" value="0.9" title="音量">
+      <button class="pbtn" data-mp="queue" title="播放列表"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h12M4 12h12M4 18h8M18 14v6M18 20a2 2 0 1 1-2-2"/></svg></button>
+      <button class="pbtn" data-mp="close" title="关闭播放器"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <div class="queue" id="mpQueue"></div>
+    </div>
+  </main>
+</div>
+
+<div class="actions" id="actions"></div>
+<button class="btn jobs-fab" id="jobsFab"></button>
+<section class="jobs" id="jobs"><header><span style="flex:1">任务</span><button class="btn" id="clearJobs">清除已完成</button><button class="btn" id="hideJobs">收起</button></header><div class="jl" id="jobList"></div></section>
+<div class="modal" id="modal"><div class="dlg" id="dlg"></div></div>
+<div class="pv" id="pv"></div>
+<div class="vp" id="vp">
+  <div class="stage" id="vpStage">
+    <video id="vpVideo" playsinline></video>
+    <div class="top"><b id="vpTitle"></b><button class="tbtn" data-vp="list">播放列表</button><button class="tbtn" data-vp="close">关闭 Esc</button></div>
+    <div class="msg" id="vpMsg"></div><div class="osd" id="vpOsd"></div>
+    <div class="ctl">
+      <div class="bar" id="vpBar"><i></i><s></s><b></b><u></u></div>
+      <div class="row2">
+        <button class="pbtn" data-vp="prev" title="上一个"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button class="pbtn big" data-vp="toggle" id="vpPlay"></button>
+        <button class="pbtn" data-vp="next" title="下一个"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+        <span class="tm" id="vpTime">0:00 / 0:00</span>
+        <input type="range" class="vol" id="vpVol" min="0" max="1" step="0.01" value="1" title="音量 ↑↓">
+        <span class="sp"></span>
+        <button class="tbtn" data-vp="sub" id="vpSubBtn">字幕</button>
+        <button class="tbtn" data-vp="speed" id="vpSpeedBtn">1.0×</button>
+        <button class="tbtn" data-vp="fs" title="全屏 F">全屏</button>
+      </div>
+    </div>
+    <div class="pop" id="vpPop"></div>
+  </div>
+  <div class="side" id="vpSide"></div>
+</div>
+<div class="menu" id="menu"></div>
+<div class="dropzone" id="dz">松开即可上传到当前文件夹</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const enc = encodeURIComponent;
+const S = {
+  info:null, cwd:'', items:[], sel:new Set(), anchor:null, filter:'all',
+  sort:{k:'name',d:1}, view:'list', query:'', searching:false, jobs:[], clientJobs:[], jobsOpen:false,
+  lastJobState:{}, targets:{}
+};
+S.sort = {k:'mtime', d:-1};
+
+async function api(url, body, method){
+  const opt = body === undefined ? {method: method||'GET'} : {method: method||'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)};
+  const r = await fetch(url, opt);
+  let j = null; try{ j = await r.json() }catch(e){}
+  if(!r.ok) throw new Error((j && j.error) || `请求失败 (${r.status})`);
+  return j;
+}
+let toastT;
+function toast(msg, err){ const t=$('#toast'); t.textContent=msg; t.className='toast on'+(err?' err':''); clearTimeout(toastT); toastT=setTimeout(()=>t.className='toast'+(err?' err':''), err?4200:2200) }
+const fail = e => toast(e.message || String(e), true);
+
+/* ---------------- 格式化 */
+function fmtSize(b){ if(!b) return '—'; const u=['B','KB','MB','GB','TB']; let i=0; while(b>=1024&&i<4){b/=1024;i++} return (i?b.toFixed(b<10?1:0):b)+' '+u[i] }
+function fmtTime(t){ const d=new Date(t*1000), n=new Date(); const p=x=>String(x).padStart(2,'0');
+  if(d.toDateString()===n.toDateString()) return `今天 ${p(d.getHours())}:${p(d.getMinutes())}`;
+  return `${d.getFullYear()===n.getFullYear()?'':d.getFullYear()+'-'}${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}` }
+const KIND_NAME = {all:'全部', dir:'文件夹', image:'图片', video:'视频', audio:'音频', pdf:'PDF', doc:'文档', archive:'压缩包', other:'其他'};
+const FOLDER_SVG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path opacity=".35" d="M3 6.5A2.5 2.5 0 0 1 5.5 4h3.6c.6 0 1.2.25 1.6.7L12 6h6.5A2.5 2.5 0 0 1 21 8.5V9H3z"/><path d="M3 9h18v8.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>';
+function iconHtml(it){
+  if(it.dir) return `<div class="ic dir">${FOLDER_SVG}</div>`;
+  const g = {image:'image', video:'video', audio:'audio', pdf:'doc', doc:'doc', archive:'archive'}[it.kind] || 'other';
+  const glyph = catSvg(g, 18);
+  if((it.kind==='image' || it.kind==='video') && it.path) return `<div class="ic" style="${tint(it.kind)}">${glyph}<img loading="lazy" src="/api/thumb?path=${enc(it.path)}&t=${it.mtime}" onload="this.style.opacity=1" onerror="this.remove()" alt=""></div>`;
+  return `<div class="ic" style="${tint(it.kind)}">${glyph}</div>`;
+}
+const tint = k => `background:color-mix(in srgb, var(--k-${k}) 14%, transparent);color:var(--k-${k})`;
+function parentOf(vp){ const i=vp.lastIndexOf('/'); return i<0? vp : vp.slice(0,i) }
+
+/* ---------------- 初始化 */
+const CAT_SVG = {
+  image:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m5 18 5-5 3 3 2-2 4 4"/>',
+  video:'<rect x="3.5" y="6" width="12" height="12" rx="2"/><path d="m15.5 10.5 5-3v9l-5-3"/>',
+  audio:'<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
+  doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
+  archive:'<rect x="4" y="8" width="16" height="12" rx="2"/><path d="M3 4h18v4H3zM10 12h4"/>',
+  other:'<circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>',
+  all:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'
+};
+const CAT_COLOR = {image:'var(--k-image)', video:'var(--k-video)', audio:'var(--k-audio)', doc:'var(--k-doc)', archive:'var(--k-archive)', other:'var(--k-other)', all:'var(--acc)'};
+const catSvg = (k, size=14) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${CAT_SVG[k]}</svg>`;
+S.page = 'lib'; S.stats = {};
+async function init(){
+  S.info = await api('/api/info');
+  renderFilters(); applyTheme();
+  const h = location.hash.slice(1) ? decodeURIComponent(location.hash.slice(1)) : '';
+  if(h === 'convert'){ await go('lib', null, true); showPage('convert') } else await go(h.startsWith('lib') ? h : 'lib');
+  loadStats(); renderConv(); pollJobs();
+}
+function catOfPath(vp){ const seg = (vp||'').split('/')[1]; const c = S.info.categories.find(c=>c.name===seg); return c ? c.key : (vp==='lib' ? 'all' : null) }
+async function loadStats(){ try{ S.stats = await api('/api/library/stats'); renderCats(); if(S.cwd==='lib' && S.page==='lib') renderList() }catch(_){} }
+function renderCats(){
+  const cur = S.page==='lib' ? catOfPath(S.cwd) : null;
+  $('#cats').innerHTML = `<button data-go="lib" class="${cur==='all'?'on':''}">全部</button>` +
+    S.info.categories.map(c => `<button data-go="${esc(c.path)}" class="${cur===c.key?'on':''}">${esc(c.name)}</button>`).join('');
+  $('#navFiles').classList.toggle('on', S.page==='lib');
+  $('#navConvert').classList.toggle('on', S.page==='convert');
+  const n = S.conv.files.filter(f=>['ready','queued','running','uploading'].includes(f.status)).length; $('#convCnt').textContent = n || '';
+}
+function showPage(p){
+  S.page = p; document.body.classList.toggle('page-convert', p==='convert');
+  $('#libView').hidden = p!=='lib'; $('#convView').hidden = p!=='convert';
+  if(p==='convert'){ history.replaceState(null,'','#convert'); S.sel.clear(); renderActions(); document.title = '格式转换 · MiniBox' }
+  else { history.replaceState(null,'','#'+encodeURIComponent(S.cwd)); renderCrumbs() }
+  renderCats();
+}
+function renderFilters(){
+  const counts = {}; for(const it of S.items) counts[it.kind]=(counts[it.kind]||0)+1;
+  let keys = ['all','dir','image','video','audio','pdf','doc','archive','other'].filter(k => k==='all' || counts[k]);
+  if(!keys.includes(S.filter)) S.filter='all';
+  keys = [];  // 极简：不再显示类型筛选，分类标签已经够用
+  $('#filters').innerHTML = keys.map(k => `<button class="chip ${S.filter===k?'on':''}" data-f="${k}">${KIND_NAME[k]}${k!=='all'?` <span style="opacity:.6">${counts[k]}</span>`:''}</button>`).join(' ')
+    + (counts.audio>1 && S.cwd!=='lib' ? ` <button class="playall" data-playall="audio">${ICON.play.replace(/18/g,'13')}播放全部音乐</button>` : '')
+    + (counts.video>1 && S.cwd!=='lib' ? ` <button class="playall" data-playall="video">${ICON.play.replace(/18/g,'13')}连播视频</button>` : '');
+}
+function applyView(){  // 图片和视频用大图，其他用列表
+  const c = catOfPath(S.cwd);
+  $('#wrap').classList.toggle('grid', (c==='image' || c==='video') && !S.searching);
+}
+
+/* ---------------- 导航与列表 */
+async function go(vp, highlight, stay){
+  if(!stay && S.page!=='lib') showPage('lib');
+  try{
+    const r = await api(vp==='lib' ? '/api/recent' : '/api/list?path='+enc(vp));
+    S.cwd = r.path; S.items = r.items; S.sel.clear(); S.anchor=null; S.searching=false; $('#q').value='';
+    history.replaceState(null,'','#'+encodeURIComponent(S.cwd));
+    renderCats(); renderCrumbs(); renderFilters(); applyView(); renderList(); renderActions();
+    if(highlight){ const hs = [].concat(highlight); hs.forEach(h=>S.sel.add(h)); renderList(); renderActions();
+      const el = document.querySelector(`.row[data-p="${CSS.escape(hs[0])}"]`); if(el){ el.scrollIntoView({block:'center'}); el.classList.add('flash') } }
+  }catch(e){ fail(e) }
+}
+const refresh = () => S.searching ? doSearch() : go(S.cwd);
+function renderCrumbs(){
+  const parts = S.cwd.split('/'); const root = {name: {lib:'我的文件', stage:'转换暂存'}[parts[0]] || parts[0]};
+  let acc = ''; const html = [];
+  parts.forEach((p,i) => { acc = i? acc+'/'+p : p; html.push(`<button data-go="${esc(acc)}">${esc(i? p : (root? root.name : p))}</button>`) });
+  $('#crumbs').innerHTML = parts.length > 2 ? `<button data-go="${esc(parentOf(S.cwd))}" class="back">‹ 返回</button>` + html.slice(1).join('<span class="sep">/</span>') : '';
+  document.title = (parts.length>1? parts[parts.length-1] : (root?root.name:'')) + ' · MiniBox';
+}
+function visibleItems(){
+  let a = S.items.filter(it => S.filter==='all' || it.kind===S.filter);
+  const {k,d} = catOfPath(S.cwd)==='audio' ? {k:'name',d:1} : S.sort;
+  const coll = new Intl.Collator('zh-CN',{numeric:true,sensitivity:'base'});
+  a.sort((x,y) => (y.dir-x.dir) || d*(k==='name'? coll.compare(x.name,y.name) : k==='size'? x.size-y.size : x.mtime-y.mtime));
+  return a;
+}
+function renderList(){
+  const items = visibleItems();
+  const inAll = S.cwd==='lib';
+  let h = '';
+  if(!items.length){
+    h = S.searching ? `<div class="empty"><b>没有找到</b>换个关键词试试</div>`
+      : `<div class="empty big"><span class="box"><svg width="72" height="72" viewBox="0 0 64 64" fill="none"><rect x="10" y="22" width="44" height="32" rx="7" fill="currentColor" opacity=".14"/><rect x="7" y="14" width="50" height="12" rx="5" fill="currentColor" opacity=".28"/><rect x="26" y="32" width="12" height="4" rx="2" fill="currentColor" opacity=".55"/></svg></span><b>${inAll?'还没有文件':'这里还没有文件'}</b>点右上角「导入」，按类型和时间挑出电脑里的文件<br>也可以直接把文件拖进窗口</div>`;
+  }
+  for(const it of items){
+    const subPath = (S.searching || inAll) ? parentOf(it.path).split('/').slice(1).join(' / ') : '';
+    const meta = [subPath, it.dir ? '' : fmtSize(it.size), fmtTime(it.mtime)].filter(Boolean).join('  ·  ');
+    h += `<div class="row ${S.sel.has(it.path)?'sel':''}" data-p="${esc(it.path)}" draggable="true">
+      ${iconHtml(it)}<span class="nm" title="${esc(it.name)}">${esc(it.name)}<span class="sub">${esc(meta)}</span></span></div>`;
+  }
+  $('#list').innerHTML = h;
+  if(typeof markPlaying==='function' && MP.queue) markPlaying();
+  $('#stat').textContent = '';
+}
+const byPath = p => S.items.find(i=>i.path===p);
+function updateSel(){
+  document.querySelectorAll('#list .row[data-p]').forEach(r => r.classList.toggle('sel', S.sel.has(r.dataset.p)));
+  const items = visibleItems(), all = items.length && items.every(i=>S.sel.has(i.path)), some = items.some(i=>S.sel.has(i.path));
+  const ck = $('#ckAll'); if(ck) ck.className = 'ck '+(all?'on':some?'part':'');
+}
+function selected(){ return [...S.sel].map(byPath).filter(Boolean) }
+
+/* ---------------- 选择 / 交互 */
+$('#list').addEventListener('click', e => {
+  const tl = e.target.closest('.tile'); if(tl){ go(tl.dataset.go); return }
+  const sb = e.target.closest('[data-sort]'); if(sb){ const k=sb.dataset.sort; S.sort = {k, d: S.sort.k===k? -S.sort.d : (k==='name'?1:-1)}; try{localStorage.setItem('mb.sort',JSON.stringify(S.sort))}catch(_){}; renderList(); return }
+  if(e.target.id==='ckAll'){ const items=visibleItems(); const all=items.every(i=>S.sel.has(i.path)); items.forEach(i=> all? S.sel.delete(i.path) : S.sel.add(i.path)); renderList(); renderActions(); return }
+  const row = e.target.closest('.row[data-p]'); if(!row){ return }
+  const p = row.dataset.p, items = visibleItems().map(i=>i.path);
+  if(e.shiftKey && S.anchor){ const a=items.indexOf(S.anchor), b=items.indexOf(p); if(!(e.metaKey||e.ctrlKey)) S.sel.clear(); items.slice(Math.min(a,b), Math.max(a,b)+1).forEach(x=>S.sel.add(x)) }
+  else if(e.metaKey || e.ctrlKey || e.target.closest('.ck')){ S.sel.has(p)? S.sel.delete(p) : S.sel.add(p); S.anchor=p }
+  else { S.sel.clear(); S.sel.add(p); S.anchor=p }
+  updateSel(); renderActions();
+});
+$('#list').addEventListener('dblclick', e => { const row=e.target.closest('.row[data-p]'); if(row) open(byPath(row.dataset.p)) });
+$('#wrap').addEventListener('click', e => { if(e.target===$('#wrap')){ S.sel.clear(); renderList(); renderActions() } });
+$('#list').addEventListener('contextmenu', e => {
+  const row = e.target.closest('.row[data-p]'); if(!row) return;
+  e.preventDefault(); if(!S.sel.has(row.dataset.p)){ S.sel.clear(); S.sel.add(row.dataset.p); renderList(); renderActions() }
+  showMenu(e.clientX, e.clientY);
+});
+function open(it){
+  if(!it) return;
+  if(it.dir) return go(it.path);
+  if(it.kind==='audio' || it.kind==='video') return playItem(it);
+  preview(it);
+}
+
+/* ---------------- 操作栏 */
+async function loadTargets(names){
+  const need = [...new Set(names.map(n => n.toLowerCase().split('.').pop()))].filter(e => !(e in S.targets));
+  if(need.length){ const q = need.map(e=>'name=x.'+enc(e)).join('&'); const r = await api('/api/formats?'+q); for(const k in r) S.targets[k.split('.').pop()] = r[k] }
+  const lists = names.map(n => S.targets[n.toLowerCase().split('.').pop()] || []);
+  return lists.length ? lists.reduce((a,b)=>a.filter(x=>b.includes(x))) : [];
+}
+function actionDefs(sel){
+  const files = sel.filter(i=>!i.dir), arcs = files.filter(i=>i.kind==='archive'), pdfs = files.filter(i=>i.ext==='pdf');
+  const acts = [];
+  if(sel.length && (sel.every(i=>i.kind==='audio') || sel.every(i=>i.kind==='video'))) acts.push(['play','播放',true]);
+  if(arcs.length && arcs.length===sel.length) acts.push(['extract','解压',true]);
+  if(files.length && files.length===sel.length) acts.push(['convert','转换格式', true]);
+  if(sel.length===1 && ['audio','video'].includes(sel[0].kind)) acts.push(['trim','剪辑']);
+  if(sel.length===1 && sel[0].ext==='pdf') acts.push(['pages','整理页面']);
+  if(pdfs.length>=2 && pdfs.length===sel.length) acts.push(['merge','合并 PDF']);
+  const sk = new Set(files.map(i=>shrinkKind(i.kind)));
+  if(files.length && files.length===sel.length && sk.size===1 && !sk.has(null)) acts.push(['shrink','缩小体积']);
+  acts.push(['compress','打包压缩']);
+  return {acts, files, arcs};
+}
+function renderActions(){
+  const sel = selected(), bar = $('#actions');
+  document.body.classList.toggle('has-sel', !!sel.length);
+  if(!sel.length){ bar.classList.remove('on'); return }
+  const {acts} = actionDefs(sel);
+  const hasConv = sel.every(i=>!i.dir && i.kind!=='archive' && i.kind!=='other');
+  // 极简：只放最常用的 2~3 个，其余收进「···」
+  const main = acts.filter(([k]) => k!=='compress' && (k!=='convert' || hasConv)).slice(0, 3);
+  let h = `<span class="cnt">已选 ${sel.length} 项</span>`;
+  main.forEach(([k,n],i) => h += `<button data-act="${k}" class="${i===0?'hl':''}">${n}</button>`);
+  h += `<button data-act="delete">删除</button><button data-act="more" title="更多">···</button>`;
+  bar.innerHTML = h; bar.classList.add('on');
+}
+$('#actions').addEventListener('click', e => { const b=e.target.closest('[data-act]'); if(!b) return;
+  if(b.dataset.act==='more'){ const r=b.getBoundingClientRect(); showMenu(r.left, r.top-8, true); return }
+  doAction(b.dataset.act) });
+
+async function doAction(act){
+  const sel = selected(); if(!sel.length) return;
+  const paths = sel.map(i=>i.path);
+  try{
+    if(act==='play'){ return sel.length===1 ? playItem(sel[0]) : (sel[0].kind==='audio' ? playMusic(sel, 0) : openVideo(sel, 0)) }
+    if(act==='extract') return startJob('extract', sel.filter(i=>i.kind==='archive').map(i=>i.path));
+    if(act==='convert') return sendToConverter(sel);
+    if(act==='compress') return compressDialog(sel);
+    if(act==='merge') return startJob('merge_pdf', paths);
+    if(act==='shrink') return shrinkDialog(sel);
+    if(act==='trim') return trimDialog(sel[0]);
+    if(act==='pages') return pagesDialog(sel[0]);
+    if(act==='download'){ for(const p of paths){ const a=document.createElement('a'); a.href='/api/file?dl=1&path='+enc(p); a.download=''; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,250)) } return }
+    if(act==='rename') return renameInline(sel[0]);
+    if(act==='move' || act==='copy') return moveDialog(sel, act==='copy');
+    if(act==='delete') return deleteItems(paths);
+    if(act==='reveal') return api('/api/reveal', {path: paths[0]}).catch(fail);
+    if(act==='open') return open(sel[0]);
+  }catch(e){ fail(e) }
+}
+
+/* ---------------- 右键 / 更多菜单 */
+function showMenu(x, y, above){
+  const sel = selected(); const m = $('#menu');
+  const {acts} = actionDefs(sel);
+  const hasConv = sel.every(i=>!i.dir && i.kind!=='archive' && i.kind!=='other');
+  let h = '';
+  if(sel.length===1 && !['audio','video'].includes(sel[0].kind)) h += `<button data-act="open">${sel[0].dir?'打开':'预览'}</button>`;
+  for(const [k,n] of acts){ if(k==='convert'&&!hasConv) continue; h += `<button data-act="${k}">${n}</button>` }
+  h += '<hr><button data-act="download">下载</button>';
+  if(sel.length===1) h += '<button data-act="rename">重命名</button>';
+  h += '<button data-act="move">移动到…</button><button data-act="copy">复制到…</button>';
+  if(S.info.local && sel.length===1) h += `<button data-act="reveal">在${S.info.os==='Darwin'?'访达':S.info.os==='Windows'?'资源管理器':'文件管理器'}中显示</button>`;
+  h += '<hr><button data-act="delete" class="danger">删除</button>';
+  m.innerHTML = h; m.classList.add('on');
+  const r = m.getBoundingClientRect();
+  m.style.left = Math.min(x, innerWidth - r.width - 8)+'px';
+  m.style.top = (above ? Math.max(8, y - r.height) : Math.min(y, innerHeight - r.height - 8))+'px';
+}
+$('#menu').addEventListener('click', e => { const b=e.target.closest('[data-act]'); if(!b) return; $('#menu').classList.remove('on'); doAction(b.dataset.act) });
+document.addEventListener('mousedown', e => { if(!e.target.closest('#menu') && !e.target.closest('[data-act="more"]')) $('#menu').classList.remove('on') });
+
+/* ---------------- 对话框 */
+function dialog(html, onOk){
+  $('#dlg').innerHTML = html; $('#modal').classList.add('on');
+  const first = $('#dlg').querySelector('input[type=text]:not([readonly]),input[type=password]'); if(first) setTimeout(()=>{first.focus(); first.select()},30);
+  return new Promise(res => {
+    const close = v => { $('#modal').classList.remove('on'); $('#dlg').onclick=null; $('#dlg').onkeydown=null; res(v) };
+    $('#dlg').onclick = async e => {
+      if(e.target.closest('[data-cancel]')) return close(null);
+      if(e.target.closest('[data-ok]')){ const v = await onOk(); if(v!==false) close(v) }
+    };
+    $('#dlg').onkeydown = async e => { if(e.key==='Enter' && e.target.tagName==='INPUT'){ e.preventDefault(); const v=await onOk(); if(v!==false) close(v) } };
+    $('#modal').onmousedown = e => { if(e.target===$('#modal')) close(null) };
+  });
+}
+function seg(name, opts, val){ return `<div class="seg" data-seg="${name}">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v===val?'on':''}">${l}</button>`).join('')}</div>` }
+$('#dlg').addEventListener('click', e => {
+  const b = e.target.closest('.seg button, .fmts button'); if(!b) return;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+  b.parentElement.dispatchEvent(new Event('change', {bubbles:true}));
+});
+const segVal = n => $(`#dlg [data-seg="${n}"] .on`)?.dataset.v;
+
+async function convertDialog(sel){
+  const targets = await loadTargets(sel.map(i=>i.name));
+  if(!targets.length) return toast('选中的文件没有共同可转换的格式'+(S.info.tools.libreoffice?'':'（文档转换需安装 LibreOffice）'), true);
+  const kinds = new Set(sel.map(i=>i.kind));
+  const onlyImg = kinds.size===1 && kinds.has('image');
+  const media = [...kinds].some(k=>k==='video'||k==='audio');
+  const pdf = kinds.size===1 && kinds.has('pdf');
+  let last = null; try{ last = localStorage.getItem('mb.fmt.'+[...kinds].join()) }catch(_){}
+  const def = targets.includes(last) ? last : targets[0];
+  const html = `<h3>转换格式</h3><p class="muted">${sel.length===1?esc(sel[0].name):sel.length+' 个文件'} · 结果保存在原文件旁边，原文件不动</p>
+    <label class="f">转成</label><div class="fmts" data-seg="fmt">${targets.map(t=>`<button type="button" data-v="${t}" class="${t===def?'on':''}">${t.toUpperCase()}</button>`).join('')}</div>
+    <div id="optBox"></div>`;
+  const renderOpts = () => {
+    const f = segVal('fmt'); let o = '';
+    const imgOut = onlyImg && !['mp4','webm'].includes(f);
+    if(imgOut){
+      if(['jpg','webp','avif'].includes(f)) o += `<label class="f">画质</label><div class="rng"><input type="range" id="oq" min="40" max="100" value="85"><span id="oqv" style="width:30px;text-align:right">85</span></div>`;
+      o += `<label class="f">尺寸</label>${seg('side',[['0','原始'],['3840','4K'],['1920','1920'],['1280','1280'],['800','800']],'0')}<div class="note">按最长边等比缩小，不会放大</div>`;
+      if(f==='pdf' && sel.length>1) o += `<label class="chk"><input type="checkbox" id="omerge" checked>合并成一个 PDF（按当前排序）</label>`;
+    }
+    if(media || (onlyImg && ['mp4','webm'].includes(f))){
+      const audioOnly = ['mp3','wav','flac','m4a','ogg','opus'].includes(f);
+      if(!['wav','flac'].includes(f)) o += `<label class="f">${audioOnly?'音质':'画质'}</label>${seg('vq',[['high','高'],['medium','标准'],['small','小体积']],'medium')}`;
+      if(!audioOnly) o += `<label class="f">分辨率</label>${seg('h',[['0','原始'],['1080','1080p'],['720','720p'],['480','480p']], f==='gif'?'480':'0')}`;
+      if(f==='gif') o += `<div class="note">GIF 体积大，建议 480p 以下、片段不要太长</div>`;
+    }
+    if(pdf && ['png','jpg'].includes(f)) o += `<label class="f">清晰度</label>${seg('dpi',[['96','普通 96'],['150','清晰 150'],['300','打印 300']],'150')}<div class="note">每页一张图，放进同名「_图片」文件夹</div>`;
+    if(pdf && f==='docx') o += `<div class="note">PDF 转 Word 由 LibreOffice 完成，复杂排版可能走样</div>`;
+    $('#optBox').innerHTML = o;
+    const q=$('#oq'); if(q) q.oninput=()=>$('#oqv').textContent=q.value;
+  };
+  setTimeout(()=>{ renderOpts(); $('#dlg [data-seg="fmt"]').addEventListener('change', renderOpts) }, 0);
+  const res = await dialog(html + `<div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>开始转换</button></div>`, () => ({
+    format: segVal('fmt'), quality: +($('#oq')?.value||85), max_side: +(segVal('side')||0), vquality: segVal('vq')||'medium',
+    height: +(segVal('h')||0), dpi: +(segVal('dpi')||150), merge: !!$('#omerge')?.checked }));
+  if(!res) return;
+  try{ localStorage.setItem('mb.fmt.'+[...kinds].join(), res.format) }catch(_){}
+  const order = visibleItems().map(i=>i.path);
+  startJob('convert', sel.map(i=>i.path).sort((a,b)=>order.indexOf(a)-order.indexOf(b)), res);
+}
+async function compressDialog(sel){
+  const def = sel.length===1 ? sel[0].name.replace(/\.[^.]+$/, '') : (S.cwd.split('/').pop() && S.cwd.includes('/') ? S.cwd.split('/').pop() : '压缩包');
+  const html = `<h3>打包压缩</h3><p class="muted">${sel.length} 项 · 压缩包会放在当前文件夹</p>
+    <label class="f">格式</label>${seg('cf',[['zip','ZIP（最通用）'],['7z','7Z（更小）'],['tar.gz','TAR.GZ']],'zip')}
+    <label class="f">文件名</label><input type="text" id="cname" value="${esc(def)}">
+    <div id="pwBox" style="display:none"><label class="f">密码（可选，7z 加密）</label><input type="password" id="cpw" placeholder="不填则不加密"></div>
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>开始打包</button></div>`;
+  setTimeout(()=> $('#dlg [data-seg="cf"]').addEventListener('change', ()=> $('#pwBox').style.display = segVal('cf')==='7z'?'block':'none'), 0);
+  const res = await dialog(html, () => ({format: segVal('cf'), name: $('#cname').value.trim(), password: segVal('cf')==='7z' ? $('#cpw').value : ''}));
+  if(res) startJob('compress', sel.map(i=>i.path), res);
+}
+async function passwordRetry(paths){
+  const res = await dialog(`<h3>需要密码</h3><p class="muted">这个压缩包加了密码</p><input type="password" id="pw" placeholder="输入解压密码">
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>解压</button></div>`, () => $('#pw').value);
+  if(res) startJob('extract', paths, {password: res});
+}
+async function moveDialog(sel, copy){
+  let cur = S.cwd, chosen = S.cwd;
+  const html = `<h3>${copy?'复制':'移动'}到</h3><p class="muted">${sel.length} 项</p><div class="crumbs" id="mvCrumbs" style="font-size:13px"></div><div class="tree" id="mvTree"></div>
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>${copy?'复制':'移动'}到这里</button></div>`;
+  const load = async vp => {
+    cur = chosen = vp;
+    const r = await api(vp==='lib' ? '/api/recent' : '/api/list?path='+enc(vp));
+    const parts = vp.split('/'); let acc='';
+    $('#mvCrumbs').innerHTML = parts.map((p,i)=>{acc=i?acc+'/'+p:p; return `<button data-mv="${esc(acc)}">${esc(i?p:'我的文件')}</button>`}).join('<span class="sep">/</span>');
+    const dirs = r.items.filter(i=>i.dir && !sel.some(s=>s.path===i.path));
+    $('#mvTree').innerHTML = ''+
+      (dirs.map(d=>`<button data-mv="${esc(d.path)}"><span style="color:var(--k-dir)">${FOLDER_SVG.replace('28','18').replace('28','18')}</span>${esc(d.name)}</button>`).join('') || '<div style="padding:10px;color:var(--ink3);font-size:13px">没有子文件夹</div>');
+  };
+  setTimeout(()=>{ load(cur); const h = e=>{ const b=e.target.closest('[data-mv]'); if(b) load(b.dataset.mv).catch(fail) }; $('#mvTree').onclick = h; $('#mvCrumbs').onclick = h },0);
+  const dest = await dialog(html, () => chosen);
+  if(!dest) return;
+  try{ await api('/api/move', {paths: sel.map(i=>i.path), dest, copy}); toast(copy?'已复制':'已移动'); refresh() }catch(e){ fail(e) }
+}
+async function deleteItems(paths){
+  const ok = await dialog(`<h3>删除 ${paths.length} 项？</h3><p class="muted">会移到系统回收站，可以找回</p>
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok style="background:var(--danger);border-color:var(--danger);color:#fff">删除</button></div>`, () => true);
+  if(!ok) return;
+  try{
+    const r = await api('/api/delete', {paths});
+    if(r.need_permanent){
+      const ok2 = await dialog(`<h3>无法放入回收站</h3><p class="muted">${esc(r.errors.slice(0,3).join('；'))}</p><p>要<b>永久删除</b>吗？此操作无法撤销。</p>
+        <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok style="background:var(--danger);border-color:var(--danger);color:#fff">永久删除</button></div>`, () => true);
+      if(ok2) await api('/api/delete', {paths, permanent:true});
+    }
+    toast('已删除'); refresh();
+  }catch(e){ fail(e) }
+}
+function renameInline(it){
+  const row = document.querySelector(`.row[data-p="${CSS.escape(it.path)}"] .nm`); if(!row) return;
+  row.innerHTML = `<input class="rename-in" value="${esc(it.name)}">`;
+  const inp = row.querySelector('input'); inp.focus();
+  const dot = it.dir ? -1 : it.name.lastIndexOf('.'); inp.setSelectionRange(0, dot>0? dot : it.name.length);
+  let done = false;
+  const finish = async save => { if(done) return; done = true;
+    if(save && inp.value.trim() && inp.value.trim()!==it.name){ try{ const r = await api('/api/rename',{path:it.path, name:inp.value.trim()}); await go(S.cwd, r.path); return }catch(e){ fail(e) } }
+    renderList() };
+  inp.onkeydown = e => { e.stopPropagation(); if(e.key==='Enter') finish(true); if(e.key==='Escape') finish(false) };
+  inp.onblur = () => finish(true);
+  inp.onclick = e => e.stopPropagation(); inp.ondblclick = e => e.stopPropagation();
+}
+
+/* ---------------- 缩小体积 */
+const SHRINK_PRESETS = {
+  image:[[100e3,'100 KB'],[200e3,'200 KB'],[500e3,'500 KB'],[1e6,'1 MB'],[2e6,'2 MB']],
+  pdf:[[500e3,'500 KB'],[1e6,'1 MB'],[2e6,'2 MB'],[5e6,'5 MB'],[10e6,'10 MB']],
+  video:[[10e6,'10 MB'],[25e6,'25 MB'],[50e6,'50 MB'],[100e6,'100 MB'],[200e6,'200 MB']],
+  audio:[[1e6,'1 MB'],[3e6,'3 MB'],[5e6,'5 MB'],[10e6,'10 MB']]
+};
+const SHRINK_NOTE = {image:'会自动调整画质和尺寸，存成 JPG（透明图片保持 PNG）', pdf:'只压缩里面的图片，文字保持清晰可选', video:'存成 MP4，会自动选合适的分辨率；视频越长，能压到的最小体积越大', audio:'存成 MP3'};
+const shrinkKind = k => k==='pdf' ? 'pdf' : ['image','video','audio'].includes(k) ? k : null;
+const MB = 1000*1000;
+function shrinkDefault(k){ let v = null; try{ v = +localStorage.getItem('mb.shrink.'+k) }catch(_){}; return v || {image:500e3, pdf:2e6, video:25e6, audio:5e6}[k] }
+function shrinkPicker(k, cur, attrs){  // 目标大小选择：预设 + 自定义
+  const presets = SHRINK_PRESETS[k], isPreset = presets.some(([v])=>v===cur);
+  const unit = cur >= MB ? 'MB' : 'KB', num = isPreset ? '' : +(cur / (unit==='MB'?MB:1000)).toFixed(2);
+  return `<div class="shr" ${attrs}>${presets.map(([v,l])=>`<button type="button" data-t="${v}" class="${v===cur?'on':''}">${l}</button>`).join('')}
+    <span class="shr-c ${isPreset?'':'on'}"><input type="number" min="1" step="any" placeholder="自定义" value="${num}"><select>${['KB','MB'].map(u=>`<option ${u===unit?'selected':''}>${u}</option>`).join('')}</select></span></div>
+    <div class="note">${SHRINK_NOTE[k]}</div>`;
+}
+function shrinkRead(box){  // 从选择器读出目标字节数
+  const on = box.querySelector('button.on'); if(on) return +on.dataset.t;
+  const n = parseFloat(box.querySelector('input').value); if(!(n>0)) return 0;
+  return Math.round(n * (box.querySelector('select').value==='MB' ? MB : 1000));
+}
+function shrinkWire(root, onChange){
+  root.addEventListener('click', e => { const b = e.target.closest('.shr button'); if(!b) return; const box = b.closest('.shr');
+    box.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b)); box.querySelector('.shr-c').classList.remove('on'); box.querySelector('input').value=''; onChange && onChange(box) });
+  root.addEventListener('input', e => { const box = e.target.closest('.shr'); if(!box) return;
+    box.querySelectorAll('button').forEach(x=>x.classList.remove('on')); box.querySelector('.shr-c').classList.add('on'); onChange && onChange(box) });
+  root.addEventListener('change', e => { const box = e.target.closest('.shr'); if(box && e.target.tagName==='SELECT') onChange && onChange(box) });
+}
+async function shrinkDialog(sel){
+  const files = sel.filter(i=>!i.dir && shrinkKind(i.kind));
+  if(!files.length) return toast('图片、视频、音乐和 PDF 才能缩小体积', true);
+  const kinds = [...new Set(files.map(i=>shrinkKind(i.kind)))];
+  if(kinds.length > 1) return toast('请一次只选同一类文件（比如都是图片）', true);
+  const k = kinds[0], total = files.reduce((s,i)=>s+i.size,0);
+  const html = `<h3>缩小体积</h3><p class="muted">${files.length===1?esc(files[0].name):files.length+' 个文件'} · 现在 ${fmtSize(total)}${files.length>1?'（每个文件分别压到目标以内）':''}</p>
+    <label class="f">压到多大以内</label>${shrinkPicker(k, shrinkDefault(k), 'id="shrBox"')}
+    <p class="note">原文件不动，另存一份「_压缩」</p>
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>开始压缩</button></div>`;
+  const target = await dialog(html, () => { const t = shrinkRead($('#shrBox')); if(t < 1000){ toast('请选一个目标大小', true); return false } return t });
+  if(!target) return;
+  try{ localStorage.setItem('mb.shrink.'+k, target) }catch(_){}
+  startJob('shrink', files.map(i=>i.path), {target});
+}
+
+shrinkWire($('#dlg'));
+
+/* ---------------- 剪辑音视频 */
+const fmtClock = t => { t = Math.max(0, t||0); const m = Math.floor(t/60), s = t - m*60; return `${m}:${s.toFixed(1).padStart(4,'0')}` };
+const parseClock = s => { const p = String(s).trim().split(':').map(Number); if(p.some(isNaN)) return NaN; return p.reduce((a,b)=>a*60+b, 0) };
+async function trimDialog(it){
+  let info; try{ info = await api('/api/media/info?path='+enc(it.path)) }catch(e){ info = {direct:true, duration:0, video:it.kind==='video'} }
+  document.querySelectorAll('audio,video').forEach(m => { try{ m.pause() }catch(_){} });
+  const D = info.duration || 0, isV = it.kind==='video';
+  const T = {s:0, e:D, off:0, dur:D};
+  $('#dlg').classList.add('wide');
+  const html = `<h3>剪辑</h3><p class="muted">${esc(it.name)} · 拖动两端选出要保留的部分</p>
+    <div class="tr-m ${isV?'':'aud'}">${isV?'<video id="trV" playsinline></video>':'<audio id="trV"></audio><div class="tr-wave">'+catSvg('audio',40)+'</div>'}</div>
+    <div class="tr-bar" id="trBar"><i></i><span class="tr-sel" id="trSel"></span><b class="tr-h" data-h="s"></b><b class="tr-h" data-h="e"></b><u id="trPh"></u></div>
+    <div class="tr-row">
+      <label>开始<input type="text" id="trS"><button type="button" class="lk" data-set="s">用当前位置</button></label>
+      <button type="button" class="pbtn big" id="trPlay" title="播放选中部分">${ICON.play}</button>
+      <label>结束<input type="text" id="trE"><button type="button" class="lk" data-set="e">用当前位置</button></label>
+    </div>
+    <p class="note" id="trInfo" style="text-align:center"></p>
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>保存这一段</button></div>`;
+  let v, playingSel = false;
+  const cur = () => (v ? v.currentTime : 0) + T.off;
+  const seek = t => { t = Math.max(0, Math.min(T.dur || t, t));
+    if(info.direct){ v.currentTime = t }
+    else { T.off = t; v.src = streamUrl(it.path, t, !isV); v.play().catch(()=>{}) } };
+  const pos = t => (T.dur ? t / T.dur * 100 : 0) + '%';
+  const draw = () => {
+    $('#trSel').style.left = pos(T.s); $('#trSel').style.width = `calc(${pos(T.e)} - ${pos(T.s)})`;
+    $('#trBar [data-h="s"]').style.left = pos(T.s); $('#trBar [data-h="e"]').style.left = pos(T.e);
+    if(document.activeElement !== $('#trS')) $('#trS').value = fmtClock(T.s);
+    if(document.activeElement !== $('#trE')) $('#trE').value = fmtClock(T.e);
+    const len = T.e - T.s;
+    $('#trInfo').textContent = `保留 ${fmtClock(len)}` + (isV ? (len <= 180 ? ' · 精确到每一帧' : ' · 较长片段用无损快剪，几秒就好') : '');
+  };
+  const tick = () => { if(!v || !$('#trPh')) return; const t = cur(); $('#trPh').style.left = pos(t);
+    if(playingSel && t >= T.e){ v.pause(); playingSel = false } $('#trPlay').innerHTML = v.paused ? ICON.play : ICON.pause };
+  setTimeout(() => {
+    v = $('#trV'); v.preload = 'auto';
+    if(info.direct) v.src = '/api/file?path='+enc(it.path); else v.src = streamUrl(it.path, 0, !isV);
+    v.addEventListener('loadedmetadata', () => { if(!T.dur && isFinite(v.duration)){ T.dur = v.duration; T.e = v.duration; draw() } });
+    v.addEventListener('timeupdate', tick); v.addEventListener('play', tick); v.addEventListener('pause', tick);
+    draw();
+    const bar = $('#trBar');
+    let drag = null;
+    const tAt = e => { const r = bar.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * T.dur };
+    bar.onpointerdown = e => { if(!T.dur) return; const h = e.target.closest('.tr-h');
+      if(h){ drag = h.dataset.h; bar.setPointerCapture(e.pointerId); e.preventDefault() } else seek(tAt(e)) };
+    bar.onpointermove = e => { if(!drag) return; const t = tAt(e);
+      if(drag==='s') T.s = Math.min(t, T.e - 0.2); else T.e = Math.max(t, T.s + 0.2); draw() };
+    bar.onpointerup = () => { if(drag){ seek(drag==='s' ? T.s : Math.max(T.s, T.e - 2)); drag = null } };
+    $('#trPlay').onclick = () => { if(!v.paused){ v.pause(); playingSel = false; return }
+      const t = cur(); if(t < T.s || t >= T.e - 0.05) seek(T.s); playingSel = true; v.play().catch(()=>{}) };
+    $('#dlg').querySelectorAll('[data-set]').forEach(b => b.onclick = () => { const t = cur();
+      if(b.dataset.set==='s') T.s = Math.min(t, T.e - 0.2); else T.e = Math.max(t, T.s + 0.2); draw() });
+    for(const [id,key] of [['#trS','s'],['#trE','e']]){ const inp = $(id);
+      inp.onkeydown = e => { e.stopPropagation(); if(e.key==='Enter') inp.blur() };
+      inp.onchange = () => { const t = parseClock(inp.value); if(!isNaN(t)){ if(key==='s') T.s = Math.max(0, Math.min(t, T.e - 0.2)); else T.e = Math.min(T.dur, Math.max(t, T.s + 0.2)); seek(T[key]) } draw() } }
+  }, 0);
+  const res = await dialog(html, () => (T.e - T.s >= 0.2 ? {start:+T.s.toFixed(3), end:+T.e.toFixed(3)} : false));
+  try{ v.pause(); v.removeAttribute('src'); v.load() }catch(_){}
+  $('#dlg').classList.remove('wide');
+  if(res) startJob('trim', [it.path], res);
+}
+
+/* ---------------- PDF 页面整理 */
+async function pagesDialog(it){
+  let n; try{ n = (await api('/api/pdf/info?path='+enc(it.path))).pages }catch(e){ return fail(e) }
+  let pages = Array.from({length:n}, (_, i) => ({i, rot:0, on:false}));
+  const hist = [];
+  $('#dlg').classList.add('wide');
+  const html = `<h3>整理页面</h3><p class="muted">${esc(it.name)} · 点选页面后旋转或删除，拖动可以调整顺序</p>
+    <div class="pg-tb" id="pgTb"></div><div class="pg-grid" id="pgGrid"></div>
+    <div class="foot"><a class="lk" id="pgSplit" style="margin-right:auto">每页拆成一个 PDF</a><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok id="pgOk">保存新 PDF</button></div>`;
+  const render = () => {
+    const sel = pages.filter(p=>p.on).length;
+    $('#pgTb').innerHTML = `<span>${sel ? `已选 ${sel} 页` : `共 ${pages.length} 页`}</span>
+      <button class="btn ghost" data-pg="all">${sel===pages.length&&sel?'取消全选':'全选'}</button>
+      <span class="sp"></span>
+      <button class="btn ghost" data-pg="l" title="向左转">↺ 左转</button><button class="btn ghost" data-pg="r" title="向右转">↻ 右转</button>
+      <button class="btn ghost" data-pg="del" ${sel?'':'disabled'}>删除</button>
+      <button class="btn ghost" data-pg="undo" ${hist.length?'':'disabled'}>撤销</button>`;
+    $('#pgGrid').innerHTML = pages.map((p, k) => `<div class="pg ${p.on?'on':''}" data-k="${k}" draggable="true">
+      <div class="pg-im"><img loading="lazy" src="/api/pdf/thumb?path=${enc(it.path)}&i=${p.i}&w=240" style="transform:rotate(${p.rot}deg)" alt=""></div>
+      <span>${p.i+1}${p.rot?` · ${p.rot}°`:''}</span><i class="ck ${p.on?'on':''}"></i></div>`).join('') || '<div class="im-empty">页面都删掉了，点「撤销」恢复</div>';
+    $('#pgOk').disabled = !pages.length;
+    $('#pgOk').textContent = pages.length ? `保存新 PDF（${pages.length} 页）` : '保存新 PDF';
+  };
+  const snap = () => { hist.push(JSON.stringify(pages)); if(hist.length > 50) hist.shift() };
+  let dragK = null;
+  setTimeout(() => {
+    render();
+    $('#pgTb').onclick = e => { const b = e.target.closest('[data-pg]'); if(!b) return; const a = b.dataset.pg;
+      const sel = pages.filter(p=>p.on), tgt = sel.length ? sel : pages;
+      if(a==='all'){ const all = sel.length===pages.length; pages.forEach(p=>p.on=!all) }
+      else if(a==='l' || a==='r'){ snap(); tgt.forEach(p => p.rot = (p.rot + (a==='r'?90:270)) % 360) }
+      else if(a==='del'){ snap(); pages = pages.filter(p=>!p.on) }
+      else if(a==='undo' && hist.length){ pages = JSON.parse(hist.pop()) }
+      render() };
+    $('#pgGrid').onclick = e => { const c = e.target.closest('.pg'); if(!c) return; const p = pages[+c.dataset.k]; p.on = !p.on; render() };
+    $('#pgGrid').ondragstart = e => { const c = e.target.closest('.pg'); if(!c) return; dragK = +c.dataset.k; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain','pg'); e.stopPropagation() };
+    $('#pgGrid').ondragover = e => { if(dragK===null) return; e.preventDefault(); e.stopPropagation();
+      document.querySelectorAll('.pg.drop').forEach(x=>x.classList.remove('drop')); const c = e.target.closest('.pg'); if(c) c.classList.add('drop') };
+    $('#pgGrid').ondrop = e => { if(dragK===null) return; e.preventDefault(); e.stopPropagation(); const c = e.target.closest('.pg');
+      if(c && +c.dataset.k !== dragK){ snap(); const [m] = pages.splice(dragK, 1); pages.splice(+c.dataset.k, 0, m) } dragK = null; render() };
+    $('#pgGrid').ondragend = e => { dragK = null; e.stopPropagation(); document.querySelectorAll('.pg.drop').forEach(x=>x.classList.remove('drop')) };
+    $('#pgSplit').onclick = () => { if(!pages.length) return; $('#pgSplit').dataset.go = '1'; $('#pgOk').click() };
+  }, 0);
+  const res = await dialog(html, () => pages.length ? {mode: $('#pgSplit').dataset.go ? 'split' : 'save', pages: pages.map(p=>[p.i, p.rot])} : false);
+  $('#dlg').classList.remove('wide');
+  if(res) startJob('pdf_pages', [it.path], res);
+}
+
+/* ---------------- 任务 */
+async function startJob(op, paths, options){
+  try{ const j = await api('/api/job', {op, paths, options: options||{}}); S.jobs.unshift(j); S.jobsOpen = true; renderJobs(); pollJobs(true) }
+  catch(e){ fail(e) }
+}
+let pollT;
+async function pollJobs(now){
+  clearTimeout(pollT);
+  try{
+    const list = await api('/api/jobs'); S.jobs = list;
+    let changed = false; const justDone = [];
+    for(const j of list){
+      const prev = S.lastJobState[j.id];
+      if(prev && prev!==j.status && ['done','error','cancelled'].includes(j.status)){
+        changed = true; if(j.status==='done') justDone.push(...j.outputs);
+        const fromConv = S.conv.files.some(f=>f.jobId===j.id);
+        if(fromConv) {}  // 转换页自己显示结果
+        else if(j.status==='done') toast(`完成：${j.title}`);
+        else if(j.status==='error') toast(`失败：${j.title}`, true);
+      }
+      S.lastJobState[j.id] = j.status;
+    }
+    renderJobs(); convSync(list);
+    if(changed) loadStats();
+    if(changed && !S.searching && S.page==='lib') go(S.cwd).then(()=>{ /* 高亮当前目录下的新文件 */
+      const fresh = justDone.filter(o=>parentOf(o)===S.cwd);
+      fresh.slice(-20).forEach(o=>{ const el=document.querySelector(`.row[data-p="${CSS.escape(o)}"]`); if(el) el.classList.add('flash') }) });
+  }catch(e){}
+  const active = S.jobs.some(j=>['queued','running'].includes(j.status)) || S.clientJobs.some(j=>j.status==='running') || S.conv?.running;
+  autoHideJobs(active);
+  pollT = setTimeout(pollJobs, active ? 600 : 4000);
+}
+let hideT = null, wasActive = false;
+function autoHideJobs(active){
+  if(active){ clearTimeout(hideT); hideT = null }
+  else if(wasActive && S.jobsOpen && !hideT){
+    hideT = setTimeout(() => { hideT = null; if(!$('#jobs').matches(':hover') && !S.jobs.some(j=>j.status==='error' && S.lastJobState[j.id]==='error' && Date.now()/1000 - j.created < 30)){ S.jobsOpen = false; renderJobs() } }, 5000);
+  }
+  wasActive = active;
+}
+function renderJobs(){
+  const convIds = new Set(S.conv.files.map(f=>f.jobId).filter(Boolean));
+  const all = [...S.clientJobs, ...S.jobs.filter(j=>!convIds.has(j.id))];
+  const active = all.filter(j=>['queued','running'].includes(j.status)).length;
+  $('#jobsFab').innerHTML = active ? `<span class="dot on" style="background:var(--acc)"></span>${active} 个任务进行中` : `任务 · ${all.length}`;
+  $('#jobsFab').classList.toggle('on', active > 0 && !S.jobsOpen);
+  $('#jobs').classList.toggle('on', !!all.length && S.jobsOpen);
+  const stName = {queued:'排队中',running:'',done:'完成',error:'失败',cancelled:'已取消'};
+  $('#jobList').innerHTML = all.map(j => {
+    const pct = Math.round(j.progress*100);
+    const outs = (j.outputs||[]).slice(0,6).map(o=>`<button data-out="${esc(o)}" title="${esc(o)}">${esc(o.split('/').pop())}</button>`).join('') + ((j.outputs||[]).length>6?`<span style="font-size:12px;color:var(--ink3)">等 ${j.outputs.length} 个</span>`:'');
+    const pwNeeded = j.status==='error' && /密码/.test((j.errors||[]).join('')) && j.title.startsWith('解压');
+    return `<div class="job"><div class="t"><b title="${esc(j.title)}">${esc(j.title)}</b>
+      <span class="st ${j.status==='done'?'ok':j.status==='error'?'err':''}">${j.status==='running'?pct+'%':stName[j.status]}</span>
+      ${['queued','running'].includes(j.status) && !j.client ? `<button class="x" data-cancel-job="${j.id}">取消</button>`:''}</div>
+      ${['queued','running'].includes(j.status)?`<div class="pb"><i style="width:${pct}%"></i></div>${j.current?`<div style="font-size:11.5px;color:var(--ink3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.current)}</div>`:''}`:''}
+      ${outs?`<div class="o">${outs}</div>`:''}
+      ${(j.notes||[]).length?`<div class="e" style="color:var(--ink3)">${esc(j.notes.slice(0,3).join('\n'))}</div>`:''}
+      ${(j.errors||[]).length?`<div class="e">${esc(j.errors.slice(0,3).join('\n'))}</div>`:''}
+      ${pwNeeded?`<div class="o"><button data-pw="${j.id}">输入密码重试</button></div>`:''}</div>`;
+  }).join('');
+}
+$('#jobList').addEventListener('click', async e => {
+  const o = e.target.closest('[data-out]'); if(o){ go(parentOf(o.dataset.out), o.dataset.out); return }
+  const c = e.target.closest('[data-cancel-job]'); if(c){ await api(`/api/jobs/${c.dataset.cancelJob}/cancel`, {}).catch(fail); pollJobs(true); return }
+  const p = e.target.closest('[data-pw]'); if(p){ const sel = selected().filter(i=>i.kind==='archive'); if(sel.length) passwordRetry(sel.map(i=>i.path)); else toast('请先选中那个压缩包，再点「输入密码重试」', true) }
+});
+$('#hideJobs').onclick = () => { S.jobsOpen=false; renderJobs() };
+$('#jobsFab').onclick = () => { S.jobsOpen=true; renderJobs() };
+$('#clearJobs').onclick = async () => { await api('/api/jobs/clear', {}).catch(fail); S.clientJobs = S.clientJobs.filter(j=>j.status==='running'); pollJobs(true) };
+
+/* ---------------- 上传 */
+/* ---------------- 从电脑导入：按位置、类型、时间挑选 */
+const IM = {places:null, drives:[], path:'', items:[], token:'', kinds:new Set(), time:'7', from:'', to:'', skip:new Set(), browse:null, loading:false, truncated:false};
+const IM_TIME = [['1','今天'],['7','7 天内'],['30','30 天内'],['y','今年'],['0','不限'],['c','自定义']];
+const IM_CATS = () => S.info.categories.map(c=>[c.key, c.name]);
+function imSince(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  if(IM.time==='1') return [d/1000, Infinity];
+  if(IM.time==='7') return [Date.now()/1000 - 7*86400, Infinity];
+  if(IM.time==='30') return [Date.now()/1000 - 30*86400, Infinity];
+  if(IM.time==='y') return [new Date(d.getFullYear(),0,1)/1000, Infinity];
+  if(IM.time==='c') return [IM.from ? new Date(IM.from+'T00:00')/1000 : 0, IM.to ? new Date(IM.to+'T23:59:59')/1000 : Infinity];
+  return [0, Infinity];
+}
+function imTimeOk(){ const [a,b] = imSince(); return IM.items.map((x,i)=>[x,i]).filter(([x])=>x[2]>=a && x[2]<=b) }
+function imPicked(){ return imTimeOk().filter(([x])=>!IM.kinds.size || IM.kinds.has(x[3])) }
+async function importDialog(){
+  if(!S.info.local) return $('#fileIn').click();
+  try{ if(!IM.places){ const r = await api('/api/import/places'); IM.places = r.places; IM.drives = r.drives; IM.home = r.home } }catch(e){ return $('#fileIn').click() }
+  try{ const s = JSON.parse(localStorage.getItem('mb.import')||'{}'); if(s.time) IM.time = s.time; if(s.kinds) IM.kinds = new Set(s.kinds); if(!IM.path && s.path) IM.path = s.path }catch(_){}
+  if(!IM.path && IM.places.length) IM.path = IM.places[0].path;
+  IM.browse = null;
+  $('#dlg').classList.add('wide');
+  const html = `<h3>从电脑导入</h3><p class="muted">选好位置、类型和时间，复制进 MiniBox 并按类型放好。原文件不动。</p>
+    <div class="im-f"><span>位置</span><div class="chips" id="imPlaces"></div></div>
+    <div class="im-f"><span>类型</span><div class="chips" id="imKinds"></div></div>
+    <div class="im-f"><span>时间</span><div class="chips" id="imTime"></div></div>
+    <div class="im-list" id="imList"></div>
+    <div class="foot"><a class="lk" id="imPick" style="margin-right:auto">手动选择文件…</a><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok id="imGo" disabled>导入</button></div>`;
+  setTimeout(() => {
+    imRender(); if(IM.path) imScan(IM.path);
+    $('#imPick').onclick = () => { $('#modal').classList.remove('on'); $('#fileIn').click() };
+    $('#dlg').addEventListener('click', imClick);
+    $('#dlg').addEventListener('change', imChange);
+    $('#dlg').addEventListener('keydown', imKey, true);
+  }, 0);
+  const res = await dialog(html, () => { const p = imPicked().filter(([,i])=>!IM.skip.has(i)); return p.length ? p.map(([,i])=>i) : false });
+  $('#dlg').removeEventListener('click', imClick); $('#dlg').removeEventListener('change', imChange); $('#dlg').removeEventListener('keydown', imKey, true);
+  $('#dlg').classList.remove('wide');
+  try{ localStorage.setItem('mb.import', JSON.stringify({time:IM.time, kinds:[...IM.kinds], path:IM.path})) }catch(_){}
+  if(!res) return;
+  try{ const j = await api('/api/import/run', {token: IM.token, idx: res}); S.jobs.unshift(j); S.jobsOpen = true; renderJobs(); pollJobs(true); IM.places = null }
+  catch(e){ fail(e) }
+}
+async function imScan(path){
+  IM.loading = true; IM.path = path; IM.items = []; IM.skip.clear(); IM.browse = null; imRender();
+  try{ const r = await api('/api/import/scan', {path}); if(IM.path!==path) return; IM.items = r.items; IM.token = r.token; IM.truncated = r.truncated; IM.path = r.path }
+  catch(e){ IM.items = []; IM.err = e.message }
+  IM.loading = false; imRender(); IM.err = '';
+}
+async function imBrowse(path){
+  try{ IM.browse = await api('/api/import/dirs?path='+enc(path||'')); imRender() }catch(e){ fail(e) }
+}
+function imRender(){
+  if(!$('#imPlaces')) return;
+  const known = IM.places.some(p=>p.path===IM.path);
+  $('#imPlaces').innerHTML = IM.places.map(p=>`<button data-place="${esc(p.path)}" class="${p.path===IM.path && !IM.browse?'on':''}">${esc(p.name)}</button>`).join('')
+    + `<button data-other class="${(!known && IM.path) || IM.browse?'on':''}" title="${esc(!known?IM.path:'')}">${!known && IM.path && !IM.browse ? esc(IM.path.split(/[\\/]/).filter(Boolean).pop()||IM.path) : '其他位置…'}</button>`;
+  const tOk = imTimeOk(), cnt = {}; tOk.forEach(([x])=>cnt[x[3]]=(cnt[x[3]]||0)+1);
+  $('#imKinds').innerHTML = `<button data-kind="" class="${!IM.kinds.size?'on':''}">全部</button>` + IM_CATS().map(([k,n])=>`<button data-kind="${k}" class="${IM.kinds.has(k)?'on':''}" ${IM.items.length && !cnt[k] && !IM.kinds.has(k)?'data-zero':''}>${n}${cnt[k]?`<em>${cnt[k]}</em>`:''}</button>`).join('');
+  $('#imTime').innerHTML = IM_TIME.map(([v,n])=>`<button data-time="${v}" class="${IM.time===v?'on':''}">${n}</button>`).join('')
+    + (IM.time==='c' ? `<span class="im-dates"><input type="date" id="imFrom" value="${IM.from}"> 至 <input type="date" id="imTo" value="${IM.to}"></span>` : '');
+  const L = $('#imList');
+  if(IM.browse){
+    const b = IM.browse;
+    L.innerHTML = `<div class="im-bh">${b.parent?`<button class="btn ghost" data-dir="${esc(b.parent)}">‹ 上一层</button>`:''}<input type="text" id="imPath" value="${esc(b.path)}" spellcheck="false"><button class="btn pri" data-use="${esc(b.path)}">就用这个文件夹</button></div>
+      ${IM.drives.length?`<div class="im-drv">${IM.drives.map(d=>`<button class="chip" data-dir="${esc(d)}">${esc(d.replace('\\',''))}</button>`).join('')}</div>`:''}
+      <div class="im-rows">${b.dirs.map(d=>`<button class="im-r" data-dir="${esc(b.path.replace(/[\\/]$/,'')+(S.info.os==='Windows'?'\\':'/')+d)}"><span class="ic dir" style="width:26px;height:26px">${FOLDER_SVG.replace(/28/g,'20')}</span><span class="n">${esc(d)}</span></button>`).join('') || '<div class="im-empty">没有子文件夹</div>'}</div>`;
+    $('#imGo').disabled = true; $('#imGo').textContent = '导入'; return;
+  }
+  if(IM.loading){ L.innerHTML = `<div class="im-empty"><span class="spin"></span>正在查看 ${esc(IM.path)} …</div>`; $('#imGo').disabled = true; return }
+  if(IM.err){ L.innerHTML = `<div class="im-empty">${esc(IM.err)}</div>`; $('#imGo').disabled = true; return }
+  const pick = imPicked(), on = pick.filter(([,i])=>!IM.skip.has(i));
+  const size = on.reduce((s,[x])=>s+x[1],0);
+  if(!pick.length){
+    L.innerHTML = `<div class="im-empty">${IM.items.length ? '没有符合条件的文件，换个类型或时间试试' : '这个文件夹里没有文件'}</div>`;
+  } else {
+    const MAX = 400, rows = pick.slice(0, MAX);
+    L.innerHTML = `<div class="im-h"><button class="ckb" data-all><span class="ck ${on.length===pick.length?'on':on.length?'part':''}"></span></button><span>${on.length} 个文件 · ${fmtSize(size)}</span>${IM.truncated?'<span class="im-warn">文件太多，只列出了一部分</span>':''}</div>
+      <div class="im-rows">${rows.map(([x,i])=>{ const parts = x[0].split('/'); const dir = parts.slice(0,-1).join(' / ');
+        return `<button class="im-r ${IM.skip.has(i)?'off':''}" data-i="${i}"><span class="ck ${IM.skip.has(i)?'':'on'}"></span><span class="ic" style="${tint(x[3])};width:26px;height:26px;border-radius:7px">${catSvg(x[3],14)}</span><span class="n" title="${esc(x[0])}">${esc(parts[parts.length-1])}${dir?`<em>${esc(dir)}</em>`:''}</span><span class="m">${fmtSize(x[1])}</span><span class="m">${fmtTime(x[2])}</span></button>` }).join('')}
+      ${pick.length>MAX?`<div class="im-empty" style="padding:10px">还有 ${pick.length-MAX} 个没列出来，也会一起导入</div>`:''}</div>`;
+  }
+  $('#imGo').disabled = !on.length;
+  $('#imGo').textContent = on.length ? `导入 ${on.length} 个文件` : '导入';
+}
+function imClick(e){
+  const b = e.target.closest('button,a'); if(!b) return;
+  if(b.dataset.place!==undefined){ imScan(b.dataset.place); return }
+  if(b.dataset.other!==undefined){ imBrowse(IM.places.some(p=>p.path===IM.path) ? IM.home : IM.path); return }
+  if(b.dataset.dir!==undefined){ imBrowse(b.dataset.dir); return }
+  if(b.dataset.use!==undefined){ imScan(b.dataset.use); return }
+  if(b.dataset.kind!==undefined){ const k = b.dataset.kind; if(!k) IM.kinds.clear(); else { IM.kinds.has(k) ? IM.kinds.delete(k) : IM.kinds.add(k); if(IM.kinds.size===IM_CATS().length) IM.kinds.clear() } imRender(); return }
+  if(b.dataset.time!==undefined){ IM.time = b.dataset.time; imRender(); return }
+  if(b.dataset.all!==undefined){ const p = imPicked(); const allOn = p.every(([,i])=>!IM.skip.has(i)); p.forEach(([,i])=> allOn ? IM.skip.add(i) : IM.skip.delete(i)); imRender(); return }
+  if(b.dataset.i!==undefined){ const i = +b.dataset.i; IM.skip.has(i) ? IM.skip.delete(i) : IM.skip.add(i); imRender(); return }
+}
+function imChange(e){
+  if(e.target.id==='imFrom'){ IM.from = e.target.value; imRender() }
+  if(e.target.id==='imTo'){ IM.to = e.target.value; imRender() }
+}
+function imKey(e){
+  if(e.target.id==='imPath' && e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); imBrowse(e.target.value) }
+  else if(e.target.type==='date' && e.key==='Enter'){ e.preventDefault(); e.stopPropagation() }
+}
+$('#upBtn').onclick = importDialog;
+$('#fileIn').onchange = e => { const fs=[...e.target.files].map(f=>({file:f, rel:f.name})); e.target.value=''; upload(fs) };
+function uploadTo(dest, list, onProgress){
+  return new Promise(async (resolve, reject) => {
+    const total = list.reduce((s,x)=>s+x.file.size,0) || 1;
+    const out = {saved:[], placed:{}}; let sent = 0;
+    const batches = []; let cur = [], curSize = 0;
+    for(const x of list){ cur.push(x); curSize += x.file.size; if(cur.length>=40 || curSize>300e6){ batches.push(cur); cur=[]; curSize=0 } }
+    if(cur.length) batches.push(cur);
+    try{
+      for(const b of batches){
+        const fd = new FormData(); fd.append('path', dest);
+        b.forEach(x => { fd.append('files', x.file, x.file.name); fd.append('rel', x.rel) });
+        const r = await new Promise((res, rej) => {
+          const xhr = new XMLHttpRequest(); xhr.open('POST','/api/upload');
+          xhr.upload.onprogress = ev => onProgress && onProgress(Math.min((sent + ev.loaded)/total, .99));
+          xhr.onload = () => { let j={}; try{ j=JSON.parse(xhr.responseText) }catch(_){}; xhr.status<300? res(j) : rej(new Error(j.error||'上传失败')) };
+          xhr.onerror = () => rej(new Error('网络错误，上传中断'));
+          xhr.send(fd);
+        });
+        sent += b.reduce((s,x)=>s+x.file.size,0);
+        out.saved.push(...(r.saved||[]));
+        for(const k in (r.placed||{})) out.placed[k] = (out.placed[k]||0) + r.placed[k];
+      }
+      resolve(out);
+    }catch(e){ reject(e) }
+  });
+}
+async function upload(list){
+  if(!list.length) return;
+  const dest = S.cwd;
+  const cj = {id:'u'+Date.now(), client:true, title:`导入 ${list.length===1?list[0].rel:list.length+' 个文件'}`, status:'running', progress:0, outputs:[], errors:[]};
+  S.clientJobs.unshift(cj); S.jobsOpen = true; renderJobs();
+  try{
+    const r = await uploadTo(dest, list, f => { cj.progress = f; renderJobs() });
+    cj.outputs = r.saved.slice(0, 50); cj.status='done'; cj.progress=1;
+    const where = Object.entries(r.placed).map(([k,n])=>`${k} ${n}`).join(' · ');
+    toast(where ? '已放好：' + where : '已添加');
+  }catch(e){ cj.status='error'; cj.errors=[e.message]; fail(e) }
+  renderJobs(); loadStats();
+  if(S.cwd===dest) go(dest, cj.outputs.filter(p=>parentOf(p)===dest).slice(0,50), true);
+}
+// 拖拽：系统文件 → 上传；列表行 → 移动
+let dragDepth = 0, dragInternal = null;
+addEventListener('dragenter', e => { if(dragInternal || !e.dataTransfer.types.includes('Files')) return; dragDepth++;
+  $('#dz').textContent = S.page==='convert' ? '松开即可加入转换列表' : S.cwd==='lib' ? '松开导入，按类型自动放进对应分类' : '松开导入（不是这一类的文件会自动放进对应分类）';
+  $('#dz').classList.add('on') });
+addEventListener('dragleave', e => { if(dragInternal) return; if(--dragDepth<=0){ dragDepth=0; $('#dz').classList.remove('on') } });
+addEventListener('dragover', e => { e.preventDefault() });
+addEventListener('drop', async e => {
+  e.preventDefault(); dragDepth=0; $('#dz').classList.remove('on');
+  if(dragInternal) return;
+  const items = [...(e.dataTransfer.items||[])].map(i=>i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if(!items.length){ const fs=[...e.dataTransfer.files].map(f=>({file:f, rel:f.name})); return S.page==='convert' ? addConvFiles(fs) : upload(fs) }
+  const out = [];
+  const walk = (ent, prefix) => new Promise(res => {
+    if(ent.isFile) ent.file(f => { out.push({file:f, rel:prefix+f.name}); res() }, () => res());
+    else { const rd = ent.createReader(); const all=[]; const read = () => rd.readEntries(async es => { if(!es.length){ for(const c of all) await walk(c, prefix+ent.name+'/'); res() } else { all.push(...es); read() } }, () => res()); read() }
+  });
+  for(const it of items) await walk(it, '');
+  S.page==='convert' ? addConvFiles(out) : upload(out);
+});
+$('#list').addEventListener('dragstart', e => {
+  const row = e.target.closest('.row[data-p]'); if(!row) return;
+  if(!S.sel.has(row.dataset.p)){ S.sel.clear(); S.sel.add(row.dataset.p); renderList(); renderActions() }
+  dragInternal = [...S.sel]; e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', dragInternal.join('\n'));
+});
+addEventListener('dragend', () => { dragInternal=null; document.querySelectorAll('.drop').forEach(x=>x.classList.remove('drop')) });
+function dropTarget(e){ return e.target.closest('.row[data-p]') && byPath(e.target.closest('.row[data-p]').dataset.p)?.dir ? e.target.closest('.row[data-p]').dataset.p
+  : e.target.closest('[data-go]')?.dataset.go }
+addEventListener('dragover', e => { if(!dragInternal) return; document.querySelectorAll('.drop').forEach(x=>x.classList.remove('drop'));
+  const t = dropTarget(e); if(t && !dragInternal.includes(t)){ (e.target.closest('.row[data-p]')||e.target.closest('[data-go]')).classList.add('drop') } });
+addEventListener('drop', async e => { if(!dragInternal) return; const t = dropTarget(e); const src = dragInternal; dragInternal=null;
+  document.querySelectorAll('.drop').forEach(x=>x.classList.remove('drop'));
+  if(!t || src.includes(t) || t===S.cwd) return;
+  try{ await api('/api/move', {paths: src, dest: t}); toast(`已移动 ${src.length} 项`); refresh() }catch(err){ fail(err) } });
+
+/* ---------------- 预览 */
+let pvIdx = -1;
+async function preview(it){
+  const files = visibleItems().filter(i=>!i.dir); pvIdx = files.findIndex(i=>i.path===it.path);
+  const src = '/api/file?path='+enc(it.path);
+  let body = '';
+  if(it.kind==='image' && !['heic','heif','tif','tiff'].includes(it.ext)) body = `<img src="${src}" alt="">`;
+  else if(it.kind==='image') body = `<img src="/api/thumb?path=${enc(it.path)}" style="width:min(80vw,600px)" alt=""><div class="na" style="margin-top:8px">浏览器无法直接显示 ${it.ext.toUpperCase()}，这里是缩略图</div>`;
+  else if(it.kind==='video') body = `<video src="${src}" controls autoplay></video>`;
+  else if(it.kind==='audio') body = `<audio src="${src}" controls autoplay style="width:min(560px,90vw)"></audio>`;
+  else if(it.ext==='pdf') body = `<iframe src="${src}"></iframe>`;
+  else if(['txt','md','csv','json','log','xml','yml','yaml','ini','js','py','html','css','ts','sh','bat','srt','ass'].includes(it.ext) || it.size<2000 && it.kind==='other'){
+    try{ const r = await api('/api/text?path='+enc(it.path)); body = `<pre>${esc(r.text)}${r.truncated?'\n\n…（只显示前一部分）':''}</pre>` }catch(e){ body = `<div class="na">${esc(e.message)}</div>` }
+  } else if(it.kind==='archive'){
+    try{ const r = await api('/api/archive?path='+enc(it.path));
+      body = r.items ? `<div class="arc">${r.items.map(x=>`<div><span>${esc(x.name)}</span><span>${x.name.endsWith('/')?'':fmtSize(x.size)}</span></div>`).join('')}${r.total>r.items.length?`<div><span>…共 ${r.total} 项</span></div>`:''}</div>`
+        : `<div class="na">${r.encrypted?'加密压缩包，无法预览内容':'这种格式不能预览内容'}<br><br><button class="btn pri" onclick="pvClose();doAction('extract')">直接解压</button></div>` }catch(e){ body = `<div class="na">${esc(e.message)}</div>` }
+  } else body = `<div class="na">这个文件不能预览<br><span style="font-size:12px">${fmtSize(it.size)}</span></div>`;
+  S.sel.clear(); S.sel.add(it.path); renderList(); renderActions();
+  $('#pv').innerHTML = `<header><b>${esc(it.name)}</b><span style="color:#999;font-size:12.5px">${fmtSize(it.size)}</span>
+    ${it.kind==='archive'?'<button onclick="pvClose();doAction(\'extract\')">解压</button>':''}
+    ${!['archive','other'].includes(it.kind)?'<button onclick="pvClose();doAction(\'convert\')">转换</button>':''}
+    <button onclick="location.href='/api/file?dl=1&path=${enc(it.path)}'">下载</button><button onclick="pvClose()">关闭 Esc</button></header>
+    <div class="body">${body}${files.length>1?'<button class="nav prev" onclick="pvStep(-1)">‹</button><button class="nav next" onclick="pvStep(1)">›</button>':''}</div>`;
+  $('#pv').classList.add('on');
+}
+function pvClose(){ $('#pv').classList.remove('on'); $('#pv').innerHTML='' }
+function pvStep(d){ const files = visibleItems().filter(i=>!i.dir); if(!files.length) return; pvIdx = (pvIdx + d + files.length) % files.length; preview(files[pvIdx]) }
+$('#pv').addEventListener('click', e => { if(e.target.classList.contains('body')) pvClose() });
+
+/* ---------------- 顶部 / 侧栏 */
+$('#crumbs').addEventListener('click', e => { const b=e.target.closest('[data-go]'); if(b) go(b.dataset.go) });
+$('#cats').addEventListener('click', e => { const b=e.target.closest('[data-go]'); if(b) go(b.dataset.go) });
+$('#navConvert').onclick = () => showPage('convert');
+$('#navFiles').onclick = () => go('lib');
+$('#settingsBtn').onclick = settingsDialog;
+async function settingsDialog(){
+  const t = S.info.tools, theme = applyTheme();
+  const cap = [['ffmpeg','视频和音频'],['pdf','PDF'],['heic','iPhone 照片（HEIC）'],['libreoffice','Word / Excel / PPT']];
+  const html = `<h3>设置</h3>
+    <label class="f">文件存放位置</label>
+    <div style="display:flex;gap:6px"><input type="text" value="${esc(S.info.library)}" readonly style="flex:1">${S.info.local?'<button class="btn" type="button" id="openLib">打开</button>':''}</div>
+    <input type="text" id="newLib" placeholder="想换个位置？在这里填新文件夹，例如 ${S.info.os==='Windows'?'D:\\MiniBox':'~/MiniBox'}" style="margin-top:6px">
+    <div class="note">换位置不会移动已有文件。</div>
+    <label class="f">外观</label>${seg('theme',[['auto','跟随系统'],['light','浅色'],['dark','深色']],theme)}
+    <label class="chk"><input type="checkbox" id="showHidden" ${S.info.show_hidden?'checked':''}>显示隐藏文件</label>
+    <label class="f">能处理的文件</label>
+    <div class="caps">${cap.map(([k,n])=>`<span class="${t[k]?'on':''}">${t[k]?'✓':'—'} ${n}${!t[k]&&k==='libreoffice'?'<em>需另装免费的 LibreOffice</em>':''}</span>`).join('')}</div>
+    <div class="foot">${S.info.desktop?'<button class="btn" type="button" id="quitApp" style="margin-right:auto">退出 MiniBox</button>':''}<button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>保存</button></div>
+    <div class="note" style="text-align:right;margin-top:10px">MiniBox ${esc(S.info.version)}</div>`;
+  setTimeout(() => {
+    $('#dlg [data-seg="theme"]').addEventListener('change', () => { try{ localStorage.setItem('mb.theme', segVal('theme')) }catch(_){}; applyTheme() });
+    const o = $('#openLib'); if(o) o.onclick = () => api('/api/reveal', {path:'lib'}).catch(fail);
+    const q = $('#quitApp'); if(q) q.onclick = quitApp;
+  }, 0);
+  const res = await dialog(html, async () => {
+    const body = {show_hidden: $('#showHidden').checked}; const nl = $('#newLib').value.trim(); if(nl) body.library = nl;
+    try{ return await api('/api/settings', body) }catch(e){ fail(e); return false } });
+  if(!res) return;
+  const changedLib = res.library && res.library !== S.info.library;
+  S.info = await api('/api/info');
+  if(changedLib){ toast('文件存放位置已改为 ' + res.library); go('lib') } else refresh();
+  loadStats();
+}
+async function newFolder(){
+  if(S.cwd==='lib') return toast('先选一个分类，再新建文件夹', true);
+  const name = await dialog(`<h3>新建文件夹</h3><input type="text" id="nf" value="新建文件夹"><div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok>创建</button></div>`, () => $('#nf').value.trim());
+  if(name){ try{ const r = await api('/api/mkdir', {path:S.cwd, name}); go(S.cwd, r.path) }catch(e){ fail(e) } }
+}
+$('#moreBtn').onclick = e => {
+  const r = e.currentTarget.getBoundingClientRect(), m = $('#menu');
+  m.innerHTML = `<button data-more="mkdir">新建文件夹</button>${S.info.local?'<button data-more="reveal">在电脑上打开这个文件夹</button>':''}<button data-more="selectall">全选</button>`;
+  m.classList.add('on'); m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 8)+'px'; m.style.top = (r.bottom + 6)+'px';
+};
+$('#menu').addEventListener('click', e => { const b = e.target.closest('[data-more]'); if(!b) return; $('#menu').classList.remove('on');
+  if(b.dataset.more==='mkdir') newFolder();
+  if(b.dataset.more==='reveal') api('/api/reveal', {path:S.cwd}).catch(fail);
+  if(b.dataset.more==='selectall'){ visibleItems().forEach(i=>S.sel.add(i.path)); updateSel(); renderActions() } }, true);
+$('#filters').addEventListener('click', e => { const pa=e.target.closest('[data-playall]'); if(pa){ const pool=visibleItems().filter(i=>i.kind===pa.dataset.playall); if(!pool.length) return; pa.dataset.playall==='audio' ? playMusic(pool, MP.mode==='shuffle'?Math.floor(Math.random()*pool.length):0) : openVideo(pool, 0); return }
+  const b=e.target.closest('[data-f]'); if(!b) return; S.filter=b.dataset.f; renderFilters(); renderList() });
+function applyTheme(){ let t='auto'; try{ t = localStorage.getItem('mb.theme')||'auto' }catch(_){}
+  if(t==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme=t; return t }
+
+let qT;
+$('#q').addEventListener('input', () => { clearTimeout(qT); qT = setTimeout(doSearch, 250) });
+async function doSearch(){
+  const q = $('#q').value.trim();
+  if(!q){ if(S.searching) go(S.cwd); return }
+  try{ const r = await api(`/api/search?path=${enc(S.cwd)}&q=${enc(q)}`); S.items = r.items; S.searching = true; S.sel.clear(); renderFilters(); renderList(); renderActions() }catch(e){ fail(e) }
+}
+
+/* ---------------- 键盘 */
+addEventListener('keydown', e => {
+  if(VP.open && !$('#modal').classList.contains('on')){ if(e.target.tagName!=='INPUT' || e.target.type==='range') vpKey(e); return }
+  if($('#pv').classList.contains('on')){ if(e.key==='Escape') pvClose(); if(e.key==='ArrowRight') pvStep(1); if(e.key==='ArrowLeft') pvStep(-1); return }
+  if($('#modal').classList.contains('on')){ if(e.key==='Escape') $('#dlg [data-cancel]')?.click(); return }
+  if(e.target.tagName==='INPUT'){ if(e.key==='Escape') e.target.blur(); return }
+  const mod = e.metaKey || e.ctrlKey;
+  if(mod && e.key.toLowerCase()==='a'){ e.preventDefault(); visibleItems().forEach(i=>S.sel.add(i.path)); renderList(); renderActions() }
+  else if(e.key==='Escape'){ S.sel.clear(); renderList(); renderActions(); $('#menu').classList.remove('on') }
+  else if(e.key==='Delete' || (e.key==='Backspace' && mod)){ if(S.sel.size) doAction('delete') }
+  else if(e.key==='F2'){ if(S.sel.size===1) doAction('rename') }
+  else if(e.key==='Enter'){ if(S.sel.size===1) open(selected()[0]) }
+  else if(e.key===' ' ){ e.preventDefault(); if(S.sel.size===1){ const it=selected()[0]; if(it.kind==='audio'||it.kind==='video') { (MP.queue[MP.idx]?.path===it.path) ? mpToggle() : playItem(it) } else if(!it.dir) preview(it) } else if(MP.queue.length) mpToggle() }
+  else if(e.key==='Backspace' || (e.altKey && e.key==='ArrowUp')){ if(S.cwd.includes('/')) go(parentOf(S.cwd)) }
+  else if(mod && e.key.toLowerCase()==='f'){ e.preventDefault(); $('#q').focus() }
+});
+
+/* ================= 播放器 ================= */
+const ICON = {
+  play:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  pause:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',
+  order:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a7 7 0 0 1 12-5l2 2M20 12a7 7 0 0 1-12 5l-2-2M18 4v5h-5M6 20v-5h5"/></svg>',
+  one:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a7 7 0 0 1 12-5l2 2M20 12a7 7 0 0 1-12 5l-2-2M18 4v5h-5M6 20v-5h5"/><text x="12" y="15" font-size="7" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700">1</text></svg>',
+  shuffle:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h3c5 0 7 12 12 12h3M3 18h3c2 0 3.5-2 4.5-4M14 9c1-2 2.5-3 4-3h3M18 3l3 3-3 3M18 15l3 3-3 3"/></svg>',
+  note:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9 17.5A2.5 2.5 0 1 1 6.5 15c.17 0 .34.02.5.05V5l12-2v11.5a2.5 2.5 0 1 1-2-2.45V7.1L9 8.4z"/></svg>'
+};
+const fmtT = t => { if(!isFinite(t)||t<0) t=0; t=Math.floor(t); const h=Math.floor(t/3600), m=Math.floor(t%3600/60), s=t%60; return (h? h+':'+String(m).padStart(2,'0') : m)+':'+String(s).padStart(2,'0') };
+const fileUrl = p => '/api/file?path='+enc(p);
+const streamUrl = (p,t,audio) => `/api/media/stream?path=${enc(p)}&t=${(t||0).toFixed(2)}${audio?'&audio=1':''}&_=${Date.now()}`;
+function barSet(bar, frac, buf){ const f=Math.max(0,Math.min(1,frac||0)); bar.querySelector('b').style.width=(f*100)+'%'; bar.querySelector('u').style.left=(f*100)+'%'; if(buf!==undefined && bar.querySelector('s')) bar.querySelector('s').style.width=(Math.min(1,buf)*100)+'%' }
+function barDrag(bar, onSeek, onPreview){
+  bar.addEventListener('pointerdown', e => {
+    bar.setPointerCapture(e.pointerId);
+    const at = ev => { const r=bar.getBoundingClientRect(); return Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width)) };
+    onPreview && onPreview(at(e));
+    const mv = ev => onPreview && onPreview(at(ev));
+    const up = ev => { bar.removeEventListener('pointermove',mv); bar.removeEventListener('pointerup',up); onSeek(at(ev)) };
+    bar.addEventListener('pointermove',mv); bar.addEventListener('pointerup',up);
+  });
+}
+/* 一个能在"直接播放"和"转码串流"之间切换的媒体源 */
+function Source(el, audioOnly){
+  const o = {el, path:null, info:null, offset:0, streaming:false, dur:0};
+  o.load = async (path, info, start=0, autoplay=true) => {
+    o.path = path; o.info = info; o.dur = info.duration || 0;
+    o.streaming = !info.direct; o.offset = o.streaming ? start : 0;
+    el.src = o.streaming ? streamUrl(path, start, audioOnly) : fileUrl(path);
+    if(!o.streaming && start) el.addEventListener('loadedmetadata', () => { el.currentTime = start }, {once:true});
+    if(autoplay) el.play().catch(()=>{});
+  };
+  o.time = () => o.offset + (el.currentTime||0);
+  o.duration = () => o.dur || (isFinite(el.duration) ? el.duration : 0);
+  o.seek = t => { t = Math.max(0, Math.min(t, (o.duration()||1e9) - 0.5));
+    if(o.streaming){ const playing = !el.paused; o.offset = t; el.src = streamUrl(o.path, t, audioOnly); if(playing || true) el.play().catch(()=>{}) }
+    else el.currentTime = t };
+  o.fallback = () => { if(o.streaming || !S.info.tools.ffmpeg) return false; const t = o.time(); o.streaming = true; o.offset = t; el.src = streamUrl(o.path, t, audioOnly); el.play().catch(()=>{}); return true };
+  return o;
+}
+
+/* ---------- 音乐 ---------- */
+const MP = { audio:new Audio(), queue:[], idx:-1, mode:'order', src:null, order:[] };
+MP.src = Source(MP.audio, true);
+try{ MP.mode = localStorage.getItem('mb.mode')||'order'; MP.audio.volume = +(localStorage.getItem('mb.vol')||0.9) }catch(_){}
+$('#mpVol').value = MP.audio.volume;
+async function playMusic(items, idx){
+  MP.queue = items.map(i=>({path:i.path, name:i.name})); MP.idx = -1;
+  if(VP.open) closeVideo();
+  await mpLoad(idx||0);
+}
+async function mpLoad(i){
+  if(!MP.queue.length) return;
+  MP.idx = (i + MP.queue.length) % MP.queue.length;
+  const tr = MP.queue[MP.idx];
+  document.body.classList.add('has-player'); $('#player').classList.add('on');
+  $('#mpTitle').textContent = tr.name; $('#mpArtist').textContent = '';
+  $('#mpCover').innerHTML = ICON.note;
+  let info; try{ info = await api('/api/media/info?path='+enc(tr.path)) }catch(e){ info = {direct:true, duration:0, title:tr.name, artist:''} }
+  if(MP.queue[MP.idx] !== tr) return;
+  tr.title = info.title; tr.artist = info.artist;
+  $('#mpTitle').textContent = info.title || tr.name;
+  $('#mpArtist').textContent = [info.artist, info.album].filter(Boolean).join(' · ') || tr.name;
+  const img = new Image(); img.onload = () => { $('#mpCover').innerHTML=''; $('#mpCover').appendChild(img) }; if(info.cover) img.src = '/api/media/cover?path='+enc(tr.path);
+  await MP.src.load(tr.path, info);
+  if('mediaSession' in navigator){
+    navigator.mediaSession.metadata = new MediaMetadata({title: info.title||tr.name, artist: info.artist||'', album: info.album||'', artwork: info.cover ? [{src: img.src, sizes:'512x512'}] : []});
+  }
+  renderQueue(); markPlaying();
+}
+function mpNext(manual){
+  if(!MP.queue.length) return;
+  if(MP.mode==='one' && !manual){ MP.src.seek(0); MP.audio.play(); return }
+  if(MP.mode==='shuffle'){ let n; do{ n = Math.floor(Math.random()*MP.queue.length) }while(MP.queue.length>1 && n===MP.idx); return mpLoad(n) }
+  mpLoad(MP.idx+1);
+}
+function mpPrev(){ if(MP.src.time() > 4) return MP.src.seek(0); mpLoad(MP.idx-1) }
+function mpToggle(){ if(!MP.queue.length) return; MP.audio.paused ? MP.audio.play() : MP.audio.pause() }
+function mpClose(){ MP.audio.pause(); MP.audio.removeAttribute('src'); MP.audio.load(); MP.queue=[]; MP.idx=-1; $('#player').classList.remove('on'); document.body.classList.remove('has-player'); $('#mpQueue').classList.remove('on'); markPlaying() }
+function renderMode(){ $('#mpMode').innerHTML = ICON[MP.mode]; $('#mpMode').title = {order:'列表循环',one:'单曲循环',shuffle:'随机播放'}[MP.mode]; $('#mpMode').classList.toggle('on', MP.mode!=='order') }
+function renderQueue(){
+  $('#mpQueue').innerHTML = `<h5>播放列表 · ${MP.queue.length} 首</h5>` + MP.queue.map((t,i)=>`<button data-qi="${i}" class="${i===MP.idx?'cur':''}"><em>${i===MP.idx?'<span class="eq"><i></i><i></i><i></i></span>':i+1}</em><span>${esc(t.title||t.name)}</span></button>`).join('');
+}
+function markPlaying(){
+  document.querySelectorAll('.row .playing').forEach(x=>x.remove());
+  const cur = MP.queue[MP.idx]; if(!cur) return;
+  const nm = document.querySelector(`.row[data-p="${CSS.escape(cur.path)}"] .nm`);
+  if(nm){ const t = document.createElement('span'); t.className = 'playing' + (MP.audio.paused?' paused':''); t.innerHTML = '<span class="eq"><i></i><i></i><i></i></span>'; nm.insertBefore(t, nm.querySelector('.sub')) }
+}
+const syncPlayIcon = () => { $('#mpPlay').innerHTML = MP.audio.paused ? ICON.play : ICON.pause; $('#player').classList.toggle('paused', MP.audio.paused); document.querySelectorAll('.row .playing').forEach(x=>x.classList.toggle('paused', MP.audio.paused)) };
+MP.audio.addEventListener('play', syncPlayIcon); MP.audio.addEventListener('pause', syncPlayIcon);
+let mpDragging = false;
+MP.audio.addEventListener('timeupdate', () => { if(mpDragging) return; const d=MP.src.duration(), t=MP.src.time(); $('#mpCur').textContent=fmtT(t); $('#mpDur').textContent=fmtT(d); barSet($('#mpBar'), d? t/d : 0) });
+MP.audio.addEventListener('ended', () => mpNext(false));
+MP.audio.addEventListener('error', () => { if(!MP.audio.getAttribute('src')) return; if(!MP.src.fallback()){ toast('这首放不了，跳到下一首', true); setTimeout(()=>mpNext(true), 800) } });
+barDrag($('#mpBar'), f => { mpDragging=false; MP.src.seek(f*MP.src.duration()) }, f => { mpDragging=true; barSet($('#mpBar'), f); $('#mpCur').textContent=fmtT(f*MP.src.duration()) });
+$('#mpVol').oninput = e => { MP.audio.volume = +e.target.value; try{localStorage.setItem('mb.vol', e.target.value)}catch(_){} };
+$('#player').addEventListener('click', e => {
+  const q = e.target.closest('[data-qi]'); if(q){ mpLoad(+q.dataset.qi); return }
+  const b = e.target.closest('[data-mp]'); if(!b) return;
+  const a = b.dataset.mp;
+  if(a==='toggle') mpToggle(); else if(a==='next') mpNext(true); else if(a==='prev') mpPrev(); else if(a==='close') mpClose();
+  else if(a==='queue') $('#mpQueue').classList.toggle('on');
+  else if(a==='mode'){ MP.mode = {order:'one',one:'shuffle',shuffle:'order'}[MP.mode]; try{localStorage.setItem('mb.mode',MP.mode)}catch(_){}; renderMode(); toast(b.title) }
+});
+document.addEventListener('mousedown', e => { if(!e.target.closest('#mpQueue') && !e.target.closest('[data-mp="queue"]')) $('#mpQueue').classList.remove('on') });
+if('mediaSession' in navigator){
+  const ms = navigator.mediaSession;
+  ms.setActionHandler('play', () => VP.open ? VP.el.play() : MP.audio.play());
+  ms.setActionHandler('pause', () => VP.open ? VP.el.pause() : MP.audio.pause());
+  ms.setActionHandler('nexttrack', () => VP.open ? vpGo(VP.idx+1) : mpNext(true));
+  ms.setActionHandler('previoustrack', () => VP.open ? vpGo(VP.idx-1) : mpPrev());
+}
+renderMode(); syncPlayIcon();
+
+/* ---------- 视频 ---------- */
+const VP = { el:$('#vpVideo'), list:[], idx:-1, open:false, src:null, info:null, subId:null, cues:[], musicWasPlaying:false, speed:1 };
+VP.src = Source(VP.el, false);
+try{ VP.el.volume = +(localStorage.getItem('mb.vvol')||1) }catch(_){}
+$('#vpVol').value = VP.el.volume;
+const posKey = p => 'mb.pos.'+p;
+async function openVideo(items, idx){
+  VP.list = items.map(i=>({path:i.path, name:i.name})); VP.open = true;
+  VP.musicWasPlaying = !MP.audio.paused; MP.audio.pause();
+  $('#vp').classList.add('on'); renderVpList();
+  await vpGo(idx||0);
+}
+async function vpGo(i){
+  if(!VP.list.length) return;
+  savePos();
+  VP.idx = (i + VP.list.length) % VP.list.length;
+  const v = VP.list[VP.idx];
+  $('#vpTitle').textContent = v.name; vpMsg('加载中…');
+  let info; try{ info = await api('/api/media/info?path='+enc(v.path)) }catch(e){ info = {direct:true, duration:0, subs:[]} }
+  if(VP.list[VP.idx] !== v) return;
+  VP.info = info;
+  let start = 0; try{ start = +(localStorage.getItem(posKey(v.path))||0) }catch(_){}
+  if(info.duration && (start < 15 || start > info.duration - 20)) start = 0;
+  clearSubs();
+  await VP.src.load(v.path, info, start);
+  VP.el.playbackRate = VP.speed;
+  if(start) osd('从 '+fmtT(start)+' 继续播放');
+  vpMsg(info.direct ? '' : '正在转码播放…');
+  if(info.subs && info.subs.length) setSub(info.subs[0].id); else $('#vpSubBtn').textContent='字幕';
+  $('#vpSubBtn').style.display = info.subs && info.subs.length ? '' : 'none';
+  renderVpList();
+  if('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({title: v.name});
+}
+function savePos(){ const v = VP.list[VP.idx]; if(!v) return; const t = VP.src.time(), d = VP.src.duration();
+  try{ if(d && t > 15 && t < d - 20) localStorage.setItem(posKey(v.path), t.toFixed(1)); else localStorage.removeItem(posKey(v.path)) }catch(_){} }
+function closeVideo(){
+  savePos(); VP.open = false; VP.el.pause(); VP.el.removeAttribute('src'); VP.el.load(); clearSubs();
+  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  $('#vp').classList.remove('on','idle'); $('#vpPop').classList.remove('on');
+  if(VP.musicWasPlaying) MP.audio.play().catch(()=>{});
+}
+function renderVpList(){
+  $('#vpSide').innerHTML = `<h5>播放列表 · ${VP.list.length}</h5>` + VP.list.map((v,i)=>{ let pos=0; try{pos=+(localStorage.getItem(posKey(v.path))||0)}catch(_){}
+    return `<button data-vi="${i}" class="${i===VP.idx?'cur':''}"><span>${esc(v.name)}</span>${pos?`<em>看到 ${fmtT(pos)}</em>`:''}</button>` }).join('');
+}
+let msgT;
+function vpMsg(t){ $('#vpMsg').textContent=t; $('#vpMsg').classList.toggle('on', !!t) }
+function osd(t){ const o=$('#vpOsd'); o.textContent=t; o.classList.add('on'); clearTimeout(msgT); msgT=setTimeout(()=>o.classList.remove('on'), 1400) }
+const syncVpIcon = () => { $('#vpPlay').innerHTML = VP.el.paused ? ICON.play : ICON.pause };
+VP.el.addEventListener('play', syncVpIcon); VP.el.addEventListener('pause', syncVpIcon);
+VP.el.addEventListener('playing', () => vpMsg(''));
+VP.el.addEventListener('waiting', () => { if(VP.src.streaming) vpMsg('缓冲中…') });
+let vpDragging = false, lastSave = 0;
+VP.el.addEventListener('timeupdate', () => {
+  const t = VP.src.time(), d = VP.src.duration();
+  if(!vpDragging){ $('#vpTime').textContent = fmtT(t)+' / '+fmtT(d);
+    let buf = 0; try{ if(VP.el.buffered.length) buf = (VP.src.offset + VP.el.buffered.end(VP.el.buffered.length-1))/d }catch(_){}
+    barSet($('#vpBar'), d? t/d : 0, buf) }
+  if(Date.now()-lastSave > 5000){ lastSave = Date.now(); savePos() }
+});
+VP.el.addEventListener('ended', () => { const v = VP.list[VP.idx]; try{ localStorage.removeItem(posKey(v.path)) }catch(_){}; if(VP.idx < VP.list.length-1){ osd('下一个'); vpGo(VP.idx+1) } });
+VP.el.addEventListener('error', () => { if(!VP.open || !VP.el.getAttribute('src')) return; if(VP.src.fallback()){ vpMsg('正在转码播放…'); reloadSubs() } else vpMsg('这个视频无法播放') });
+barDrag($('#vpBar'), f => { vpDragging=false; VP.src.seek(f*VP.src.duration()); reloadSubs() }, f => { vpDragging=true; barSet($('#vpBar'), f); $('#vpTime').textContent = fmtT(f*VP.src.duration())+' / '+fmtT(VP.src.duration()) });
+$('#vpVol').oninput = e => { VP.el.volume = +e.target.value; try{localStorage.setItem('mb.vvol', e.target.value)}catch(_){} };
+function vpSeekBy(d){ VP.src.seek(VP.src.time()+d); reloadSubs(); osd((d>0?'快进 ':'后退 ')+Math.abs(d)+' 秒') }
+// 字幕：自己解析 VTT 并按串流偏移校正时间
+function parseVtt(txt){
+  const cues = []; const ts = s => { const p = s.trim().split(':').map(Number); return p.length===3 ? p[0]*3600+p[1]*60+p[2] : p[0]*60+p[1] };
+  for(const blk of txt.replace(/\r/g,'').split(/\n\n+/)){
+    const lines = blk.split('\n'); const i = lines.findIndex(l=>l.includes('-->')); if(i<0) continue;
+    const [a,b] = lines[i].split('-->'); const text = lines.slice(i+1).join('\n').replace(/<[^>]+>/g,'').replace(/\{\\[^}]*\}/g,'').trim();
+    if(text) cues.push([ts(a), ts(b.trim().split(/\s/)[0]), text]);
+  }
+  return cues;
+}
+let subTrack = null;
+function wipeCues(){ if(!subTrack) return; subTrack.mode='hidden'; while(subTrack.cues && subTrack.cues.length) subTrack.removeCue(subTrack.cues[0]) }
+function clearSubs(){ VP.cues = []; VP.subId = null; wipeCues(); if(subTrack) subTrack.mode='disabled' }
+async function setSub(id){
+  clearSubs(); VP.subId = id;
+  if(!id){ $('#vpSubBtn').textContent = '字幕：关'; return }
+  try{ const r = await fetch(`/api/media/sub?path=${enc(VP.list[VP.idx].path)}&id=${enc(id)}`); if(!r.ok) throw 0; VP.cues = parseVtt(await r.text()) }catch(_){ toast('字幕加载失败', true); return }
+  const s = VP.info.subs.find(x=>x.id===id); $('#vpSubBtn').textContent = '字幕：'+(s? s.label : '开');
+  reloadSubs();
+}
+function reloadSubs(){
+  if(!subTrack){ subTrack = VP.el.addTextTrack('subtitles', 'sub', 'zh') }
+  wipeCues();
+  const off = VP.src.streaming ? VP.src.offset : 0;
+  for(const [a,b,t] of VP.cues){ if(b-off <= 0) continue; try{ const c = new VTTCue(Math.max(0,a-off), b-off, t); c.line = -4; subTrack.addCue(c) }catch(_){} }
+  subTrack.mode = VP.cues.length ? 'showing' : 'disabled';
+}
+function showPop(kind){
+  const pop = $('#vpPop');
+  if(pop.classList.contains('on') && pop.dataset.kind===kind){ pop.classList.remove('on'); return }
+  pop.dataset.kind = kind;
+  if(kind==='speed') pop.innerHTML = [0.5,0.75,1,1.25,1.5,2,3].map(r=>`<button data-rate="${r}" class="${r===VP.speed?'on':''}">${r.toFixed(r%1?2:1).replace(/0$/,'')}×</button>`).join('');
+  else pop.innerHTML = `<button data-sid="" class="${!VP.subId?'on':''}">关闭字幕</button>` + (VP.info.subs||[]).map(s=>`<button data-sid="${esc(s.id)}" class="${VP.subId===s.id?'on':''}">${esc(s.label)}</button>`).join('');
+  pop.classList.add('on');
+}
+$('#vp').addEventListener('click', e => {
+  const r = e.target.closest('[data-rate]'); if(r){ VP.speed = +r.dataset.rate; VP.el.playbackRate = VP.speed; $('#vpSpeedBtn').textContent = VP.speed+'×'; $('#vpPop').classList.remove('on'); return }
+  const sd = e.target.closest('[data-sid]'); if(sd){ setSub(sd.dataset.sid||null); $('#vpPop').classList.remove('on'); return }
+  const vi = e.target.closest('[data-vi]'); if(vi){ vpGo(+vi.dataset.vi); return }
+  const b = e.target.closest('[data-vp]');
+  if(!b){ if(e.target===VP.el){ $('#vpPop').classList.remove('on'); VP.el.paused ? VP.el.play() : VP.el.pause() } return }
+  const a = b.dataset.vp;
+  if(a==='close') closeVideo(); else if(a==='toggle') VP.el.paused ? VP.el.play() : VP.el.pause();
+  else if(a==='next') vpGo(VP.idx+1); else if(a==='prev') vpGo(VP.idx-1);
+  else if(a==='list') $('#vp').classList.toggle('list');
+  else if(a==='fs') document.fullscreenElement ? document.exitFullscreen() : $('#vp').requestFullscreen().catch(()=>{});
+  else if(a==='speed' || a==='sub') showPop(a);
+});
+VP.el.addEventListener('dblclick', () => document.fullscreenElement ? document.exitFullscreen() : $('#vp').requestFullscreen().catch(()=>{}));
+let idleT;
+$('#vp').addEventListener('mousemove', () => { $('#vp').classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(()=>{ if(!VP.el.paused && !$('#vpPop').classList.contains('on')) $('#vp').classList.add('idle') }, 2500) });
+function vpKey(e){
+  const k = e.key;
+  if(k==='Escape'){ if(document.fullscreenElement) return; closeVideo() }
+  else if(k===' ' || k==='k'){ e.preventDefault(); VP.el.paused ? VP.el.play() : VP.el.pause() }
+  else if(k==='ArrowRight') vpSeekBy(e.shiftKey?30:5);
+  else if(k==='ArrowLeft') vpSeekBy(e.shiftKey?-30:-5);
+  else if(k==='ArrowUp'){ e.preventDefault(); VP.el.volume = Math.min(1, VP.el.volume+.1); $('#vpVol').value=VP.el.volume; osd('音量 '+Math.round(VP.el.volume*100)+'%') }
+  else if(k==='ArrowDown'){ e.preventDefault(); VP.el.volume = Math.max(0, VP.el.volume-.1); $('#vpVol').value=VP.el.volume; osd('音量 '+Math.round(VP.el.volume*100)+'%') }
+  else if(k==='f' || k==='F') document.fullscreenElement ? document.exitFullscreen() : $('#vp').requestFullscreen().catch(()=>{});
+  else if(k==='n' || k==='PageDown') vpGo(VP.idx+1);
+  else if(k==='p' || k==='PageUp') vpGo(VP.idx-1);
+  else if(k==='m'){ VP.el.muted = !VP.el.muted; osd(VP.el.muted?'静音':'取消静音') }
+  else if(k==='[' || k===']'){ const rs=[0.5,0.75,1,1.25,1.5,2,3]; let i=rs.indexOf(VP.speed); i=Math.max(0,Math.min(rs.length-1,i+(k===']'?1:-1))); VP.speed=rs[i]; VP.el.playbackRate=VP.speed; $('#vpSpeedBtn').textContent=VP.speed+'×'; osd('速度 '+VP.speed+'×') }
+}
+addEventListener('beforeunload', savePos);
+
+/* ---------- 打开媒体 ---------- */
+function playItem(it){
+  const pool = visibleItems().filter(i=>i.kind===it.kind);
+  if(it.kind==='audio') return playMusic(pool, pool.findIndex(i=>i.path===it.path));
+  if(it.kind==='video') return openVideo(pool, pool.findIndex(i=>i.path===it.path));
+}
+
+/* ---------- 桌面模式：心跳，窗口全关后自动退出 ---------- */
+function beat(){ fetch('/api/heartbeat', {method:'POST'}).catch(()=>{}) }
+setInterval(beat, 10000); beat();
+document.addEventListener('visibilitychange', beat);
+addEventListener('pagehide', () => { try{ navigator.sendBeacon('/api/bye') }catch(_){} });
+async function quitApp(){ await fetch('/api/quit',{method:'POST'}).catch(()=>{}); document.body.innerHTML = '<div class="empty" style="padding-top:30vh"><b>MiniBox 已退出</b>可以关闭这个窗口了</div>'; setTimeout(()=>window.close(), 300) }
+
+/* ================= 格式转换页 ================= */
+S.conv = { files:[], choice:{}, opts:{}, running:false, batch:null };
+const GROUP_NAME = {image:'图片', video:'视频', audio:'音频', pdf:' PDF', doc:'文档'};
+const extOf = n => { const l=n.toLowerCase(); for(const m of ['tar.gz','tar.bz2','tar.xz']) if(l.endsWith('.'+m)) return m; return l.includes('.') ? l.split('.').pop() : '' };
+const KIND_BY_EXT = (() => { const m={}; const add=(k,l)=>l.split(' ').forEach(e=>m[e]=k);
+  add('image','jpg jpeg png webp gif bmp tif tiff ico heic heif avif'); add('video','mp4 mkv mov avi webm flv wmv m4v ts 3gp mpg mpeg');
+  add('audio','mp3 wav flac aac m4a ogg opus wma aiff aif amr'); add('pdf','pdf'); add('doc','doc docx odt rtf txt md wps xls xlsx ods csv et ppt pptx odp dps');
+  add('archive','zip 7z rar tar gz bz2 xz tgz tar.gz tar.bz2 tar.xz iso'); return m })();
+const kindOfName = n => KIND_BY_EXT[extOf(n)] || 'other';
+let convSeq = 0;
+function convFile(name, size){ return {id:'c'+(++convSeq), name, size, ext:extOf(name), kind:kindOfName(name), path:null, status:'uploading', progress:0, outputs:[], error:null, jobId:null} }
+
+async function addConvFiles(list){
+  if(!list.length) return;
+  if(S.conv.running) return toast('正在转换，请等这一批完成', true);
+  if(S.conv.files.length && S.conv.files.every(f=>f.status==='done'||f.status==='error')) S.conv.files = [];  // 上一批已完成：开始新一批
+  if(!S.conv.batch){ const b = 'b' + Date.now(); try{ await api('/api/mkdir', {path:'stage', name:b}); S.conv.batch = 'stage/'+b }catch(e){ return fail(e) } }
+  const entries = list.map(x => { const f = convFile(x.file.name, x.file.size); S.conv.files.push(f); return f });
+  renderConv();
+  try{
+    const r = await uploadTo(S.conv.batch, list.map(x=>({file:x.file, rel:x.file.name})), p => { entries.forEach(f=>f.progress=p); renderConvList() });
+    entries.forEach((f,i) => { f.path = r.saved[i]; f.name = (r.saved[i]||'').split('/').pop() || f.name; f.status = 'ready'; f.progress = 0 });
+  }catch(e){ entries.forEach(f => { f.status='error'; f.error=e.message }) }
+  renderConv();
+}
+function sendToConverter(items){
+  if(S.conv.running) return toast('正在转换，请等这一批完成', true);
+  if(S.conv.files.length && S.conv.files.every(f=>f.status==='done'||f.status==='error')) S.conv.files = [];
+  for(const it of items.filter(i=>!i.dir)){
+    if(S.conv.files.some(f=>f.path===it.path)) continue;
+    const f = convFile(it.name, it.size); f.path = it.path; f.status = 'ready'; S.conv.files.push(f);
+  }
+  showPage('convert'); renderConv();
+}
+function convGroups(){
+  const g = {};
+  for(const f of S.conv.files){ if(!GROUP_NAME[f.kind] || !['ready','queued','running','uploading'].includes(f.status)) continue; (g[f.kind] = g[f.kind] || []).push(f) }
+  return g;
+}
+async function convTargets(files){
+  const names = files.map(f=>f.name);
+  return names.length ? await loadTargets(names) : [];
+}
+function renderConvList(){
+  const L = $('#convLeft'), F = S.conv.files;
+  if(!F.length){
+    L.innerHTML = `<div class="drop-big" id="convDrop"><svg style="color:var(--acc)" width="64" height="64" viewBox="0 0 64 64" fill="none"><rect x="10" y="22" width="44" height="32" rx="7" fill="currentColor" opacity=".14"/><rect x="7" y="14" width="50" height="12" rx="5" fill="currentColor" opacity=".28"/><rect x="26" y="32" width="12" height="4" rx="2" fill="currentColor" opacity=".55"/></svg>
+      <b>把要转换的文件拖到这里</b>
+      <span class="links"><a id="convAdd2">选择文件</a>　·　<a id="pickLib">从我的文件里选</a></span>
+      <span class="hint">图片、视频、音频、PDF${S.info.tools.libreoffice?'、Office 文档':''}，一次可以放很多个</span></div>`;
+    return;
+  }
+  const label = f => {
+    if(f.status==='uploading') return `<span class="m">正在载入… ${Math.round(f.progress*100)}%</span>`;
+    if(f.status==='error') return `<span class="m err">${esc(f.error||'失败')}</span>`;
+    if(f.status==='done') return `<span class="m ok">✓ 已存到「${esc((f.outputs[0]||'').split('/')[1]||'')}」· ${esc((f.outputs[0]||'').split('/').pop())}${f.note?`<span style="color:var(--ink3)"> · ${esc(f.note)}</span>`:''}</span>`;
+    if(!GROUP_NAME[f.kind]) return `<span class="m err">这种文件不能转换</span>`;
+    return `<span class="m">${fmtSize(f.size)}${f.status==='queued'?'　等待中':f.status==='running'?'　转换中':''}</span>`;
+  };
+  const st = f => f.status==='done' ? `<a data-open="${esc(f.outputs[0]||'')}">打开</a>`
+    : f.status==='running' ? Math.round(f.progress*100)+'%' : '';
+  L.innerHTML = `<div class="sec-h"><h3>文件</h3><span class="n">${F.length}</span><span class="sp"></span>
+      <button class="lk" id="convAdd" ${S.conv.running?'disabled':''}>+ 添加</button><button class="lk" id="pickLib2" ${S.conv.running?'disabled':''}>从我的文件里选</button><button class="lk" id="convClear" ${S.conv.running?'disabled':''}>清空</button></div><div class="cfl">`
+    + F.map(f => `<div class="cf" data-cid="${f.id}">${f.path||f.kind!=='image' ? iconHtml({kind:GROUP_NAME[f.kind]||f.kind==='archive'?f.kind:'other', ext:f.ext, path:f.path||'', mtime:0, dir:false}) : `<div class="ic" style="${tint('image')}">${esc(f.ext.toUpperCase().slice(0,4))}</div>`}
+      <div style="min-width:0"><div class="n" title="${esc(f.name)}">${esc(f.name)}</div>${label(f)}</div>
+      <span class="st">${st(f)}</span>
+      <button class="x" data-rm="${f.id}" title="移出列表" ${S.conv.running?'disabled':''}>×</button>
+      ${(f.status==='running'||f.status==='uploading') ? `<div class="pb"><i style="width:${Math.round(f.progress*100)}%"></i></div>` : ''}</div>`).join('') + '</div>';
+}
+async function renderConvRight(){
+  const R = $('#convRight'), groups = convGroups(), kinds = Object.keys(groups);
+  if(!kinds.length){ R.innerHTML = ''; renderConvFoot(); return }
+  const parts = [];
+  for(const k of kinds){
+    const files = groups[k];
+    let targets = await convTargets(files);
+    if(shrinkKind(k) && targets.length) targets = ['shrink', ...targets];
+    if(!targets.length){ parts.push(`<div class="cg"><h4>${GROUP_NAME[k]} <span>${files.length} 个</span></h4><div class="note">这些文件没有共同可转的格式${k==='doc'&&!S.info.tools.libreoffice?'（文档转换需要安装 LibreOffice）':''}</div></div>`); continue }
+    let last = null; try{ last = localStorage.getItem('mb.fmt.'+k) }catch(_){}
+    const exts = new Set(files.map(f=>({jpeg:'jpg',tif:'tiff'}[f.ext]||f.ext)));
+    if(!targets.includes(S.conv.choice[k])) S.conv.choice[k] = targets.includes(last) && !(exts.size===1 && exts.has(last)) ? last : (targets.find(t=>t!=='shrink' && !exts.has(t)) || targets[0]);
+    const fmt = S.conv.choice[k]; const o = S.conv.opts[k] = S.conv.opts[k] || {};
+    const seg = (name, opts, def) => { if(o[name]===undefined) o[name] = def; return `<div class="seg" data-k="${k}" data-o="${name}">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${String(o[name])===String(v)?'on':''}">${l}</button>`).join('')}</div>` };
+    let opt = '';
+    if(fmt==='shrink'){ if(!o.target) o.target = shrinkDefault(k) }
+    else if(k==='image' && !['mp4','webm'].includes(fmt)){
+      if(['jpg','webp','avif'].includes(fmt)){ if(o.quality===undefined) o.quality = 85; opt += `<div><label>画质 <b id="q_${k}">${o.quality}</b></label><div class="rng"><input type="range" min="40" max="100" value="${o.quality}" data-k="${k}" data-o="quality"></div></div>` }
+      opt += `<div><label>尺寸（按最长边缩小）</label>${seg('max_side',[['0','原始'],['3840','4K'],['1920','1920'],['1280','1280'],['800','800']],'0')}</div>`;
+    }
+    if(fmt!=='shrink' && (k==='video' || k==='audio' || (k==='image' && ['mp4','webm'].includes(fmt)))){
+      const audioOnly = ['mp3','wav','flac','m4a','ogg','opus'].includes(fmt);
+      if(!['wav','flac'].includes(fmt)) opt += `<div><label>${audioOnly?'音质':'画质'}</label>${seg('vquality',[['high','高'],['medium','标准'],['small','小体积']],'medium')}</div>`;
+      if(!audioOnly) opt += `<div><label>分辨率</label>${seg('height',[['0','原始'],['1080','1080p'],['720','720p'],['480','480p']], fmt==='gif'?'480':'0')}</div>`;
+    }
+    if(k==='pdf' && ['png','jpg'].includes(fmt)) opt += `<div><label>清晰度</label>${seg('dpi',[['96','普通'],['150','清晰'],['300','打印']],'150')}</div>`;
+    const merge = k==='image' && fmt==='pdf' && files.length>1;
+    parts.push(`<div class="cg"><h4>${kinds.length>1 ? GROUP_NAME[k].trim()+'转成' : '转成'}</h4>
+      <div class="fmts" data-k="${k}">${targets.map(t=>`<button type="button" data-f="${t}" class="${t===fmt?'on':''} ${t==='shrink'?'wide':''}">${t==='shrink'?'缩小体积':t.toUpperCase()}</button>`).join('')}</div>
+      ${fmt==='shrink'?`<div class="opt" style="margin-top:12px"><label>压到多大以内（每个文件）</label>${shrinkPicker(shrinkKind(k), o.target, `data-k="${k}"`)}</div>`:''}
+      ${merge?`<label class="chk"><input type="checkbox" data-k="${k}" data-o="merge" ${o.merge?'checked':''}>合并成一个 PDF</label>`:''}
+      ${fmt==='gif'?'<div class="note">GIF 体积较大，适合几秒钟的短片段</div>':''}
+      ${k==='pdf'&&fmt==='docx'?'<div class="note">复杂排版转 Word 可能会走样</div>':''}
+      ${opt?`<details ${S.conv.openOpts?.[k]?'open':''} data-k="${k}"><summary>${{image:'画质与尺寸',video:'画质与分辨率',audio:'音质',pdf:'清晰度'}[k]||'更多设置'}</summary><div class="opt">${opt}</div></details>`:''}</div>`);
+  }
+  R.innerHTML = parts.join('');
+  renderConvFoot();
+}
+function renderConvFoot(){
+  const groups = convGroups(); const ready = S.conv.files.filter(f=>f.status==='ready' && GROUP_NAME[f.kind] && S.conv.choice[f.kind]);
+  const done = S.conv.files.filter(f=>f.status==='done').length, err = S.conv.files.filter(f=>f.status==='error').length;
+  let t = '';
+  if(S.conv.running) t = `已完成 ${done} / ${S.conv.files.filter(f=>f.jobId).length}`;
+  else if(ready.length) t = '转好的文件会自动存进「我的文件」';
+  else if(done || err) t = `转好了 ${done} 个${err?`，${err} 个没成功`:''}`;
+  $('.conv-foot').hidden = !S.conv.files.length;
+  $('#convSum').textContent = t;
+  const finished = !S.conv.running && !ready.length && (done || err);
+  $('#convGo').disabled = !finished && (S.conv.running || !ready.length || S.conv.files.some(f=>f.status==='uploading'));
+  $('#convGo').textContent = S.conv.running ? '正在转换…' : finished ? '再转一批' : `转换 ${ready.length} 个文件`;
+  $('#convGo').classList.toggle('pri', !finished);
+}
+function renderConv(){ renderConvList(); renderConvRight(); renderCats() }
+
+$('#convLeft').addEventListener('click', e => {
+  if(e.target.closest('#pickLib') || e.target.closest('#pickLib2')){ e.preventDefault(); e.stopPropagation(); return pickFromLibrary() }
+  if(e.target.closest('#convDrop') || e.target.closest('#convAdd') || e.target.closest('#convAdd2')) return $('#convIn').click();
+  if(e.target.closest('#convClear')){ S.conv.files = []; S.conv.batch = null; renderConv(); return }
+  const rm = e.target.closest('[data-rm]'); if(rm){ S.conv.files = S.conv.files.filter(f=>f.id!==rm.dataset.rm); renderConv(); return }
+  const op = e.target.closest('[data-open]'); if(op && op.dataset.open){ go(parentOf(op.dataset.open), op.dataset.open); return }
+  const dl = e.target.closest('[data-dl]'); if(dl && dl.dataset.dl){ location.href = '/api/file?dl=1&path='+enc(dl.dataset.dl) }
+});
+$('#convIn').onchange = e => { const fs=[...e.target.files].map(f=>({file:f, rel:f.name})); e.target.value=''; addConvFiles(fs) };
+$('#convRight').addEventListener('click', e => {
+  const fb = e.target.closest('.fmts button'); if(fb){ const k = fb.parentElement.dataset.k; S.conv.choice[k] = fb.dataset.f; try{ localStorage.setItem('mb.fmt.'+k, fb.dataset.f) }catch(_){}; renderConvRight(); return }
+  const sb = e.target.closest('.seg button'); if(sb){ const g = sb.parentElement; S.conv.opts[g.dataset.k][g.dataset.o] = sb.dataset.v; g.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b===sb)); return }
+});
+shrinkWire($('#convRight'), box => { const o = S.conv.opts[box.dataset.k]; if(o) o.target = shrinkRead(box) });
+$('#convRight').addEventListener('input', e => { const t = e.target; if(t.dataset.o==='quality'){ S.conv.opts[t.dataset.k].quality = +t.value; const q=$('#q_'+t.dataset.k); if(q) q.textContent = t.value } });
+$('#convRight').addEventListener('change', e => { const t = e.target; if(t.type==='checkbox') S.conv.opts[t.dataset.k][t.dataset.o] = t.checked });
+$('#convRight').addEventListener('toggle', e => { const d = e.target; if(d.tagName==='DETAILS'){ S.conv.openOpts = S.conv.openOpts || {}; S.conv.openOpts[d.dataset.k] = d.open } }, true);
+
+$('#convGo').onclick = async () => {
+  if($('#convGo').textContent === '再转一批'){ S.conv.files = []; S.conv.batch = null; renderConv(); return }
+  const groups = convGroups(); S.conv.running = true;
+  for(const k of Object.keys(groups)){
+    const fmt = S.conv.choice[k]; const files = groups[k].filter(f=>f.status==='ready'); if(!fmt || !files.length) continue;
+    const o = S.conv.opts[k] || {};
+    try{
+      if(fmt==='shrink'){ const j = await api('/api/job', {op:'shrink', paths: files.map(f=>f.path), options:{target: o.target || shrinkDefault(shrinkKind(k))}});
+        try{ localStorage.setItem('mb.shrink.'+shrinkKind(k), o.target) }catch(_){}
+        files.forEach(f => { f.jobId = j.id; f.status = 'queued' }); continue }
+      const j = await api('/api/job', {op:'convert', paths: files.map(f=>f.path), options:{format:fmt, quality:+(o.quality||85), max_side:+(o.max_side||0),
+        vquality:o.vquality||'medium', height:+(o.height||0), dpi:+(o.dpi||150), merge:!!o.merge}});
+      files.forEach(f => { f.jobId = j.id; f.status = 'queued' });
+    }catch(e){ files.forEach(f => { f.status='error'; f.error=e.message }) }
+  }
+  S.conv.running = S.conv.files.some(f=>f.status==='queued');
+  renderConv(); pollJobs(true);
+};
+function convSync(jobs){
+  if(!S.conv.files.some(f=>f.jobId)) return;
+  let changed = false;
+  for(const f of S.conv.files){
+    if(!f.jobId || f.status==='done' || f.status==='error') continue;
+    const j = jobs.find(x=>x.id===f.jobId); if(!j) continue;
+    const it = (j.items||[]).find(x=>x.src===f.path);
+    if(it && (it.outputs.length || it.error)){
+      if(it.error){ f.status='error'; f.error=it.error } else { f.status='done'; f.outputs=it.outputs; f.note=it.note||'' }
+      changed = true; continue;
+    }
+    if(['error','cancelled'].includes(j.status)){ f.status='error'; f.error=(j.errors||[]).join('；')||'已取消'; changed = true; continue }
+    if(j.status==='done'){ f.status='done'; f.outputs=j.outputs; changed = true; continue }
+    if(j.status==='running' && j.current===f.name){ f.status='running'; f.progress = Math.max(0, Math.min(1, j.progress*j.total - j.done)); changed = true }
+    else if(f.status!=='queued' && f.status!=='running'){ f.status='queued'; changed = true }
+  }
+  const was = S.conv.running;
+  S.conv.running = S.conv.files.some(f=>f.status==='queued'||f.status==='running');
+  if(changed || was !== S.conv.running){ renderConvList(); renderConvFoot() }
+  if(was && !S.conv.running){ const n = S.conv.files.filter(f=>f.status==='done').length; toast(`转换好了 ${n} 个，已存进「我的文件」`); loadStats(); renderConvRight() }
+}
+async function pickFromLibrary(){
+  let cur = 'lib'; const picked = new Map();
+  const html = `<h3>从我的文件里选</h3><p class="muted">勾选要转换的文件</p><div class="crumbs" id="pkCrumbs" style="font-size:13px"></div><div class="tree" id="pkTree"></div>
+    <div class="foot"><button class="btn" data-cancel>取消</button><button class="btn pri" data-ok id="pkOk">添加</button></div>`;
+  const load = async vp => {
+    cur = vp; const r = await api('/api/list?path='+enc(vp));
+    const parts = vp.split('/'); let acc='';
+    $('#pkCrumbs').innerHTML = parts.map((p,i)=>{acc=i?acc+'/'+p:p; return `<button data-pk="${esc(acc)}">${esc(i?p:'我的文件')}</button>`}).join('<span class="sep">/</span>');
+    const items = r.items.sort((a,b)=>(b.dir-a.dir)||a.name.localeCompare(b.name,'zh'));
+    $('#pkTree').innerHTML = items.map(it => it.dir
+      ? `<button data-pk="${esc(it.path)}"><span style="color:var(--k-dir)">${FOLDER_SVG.replace(/28/g,'18')}</span>${esc(it.name)}</button>`
+      : `<button data-pf="${esc(it.path)}" class="${picked.has(it.path)?'on':''}"><span class="ck ${picked.has(it.path)?'on':''}"></span>${esc(it.name)}<span style="margin-left:auto;color:var(--ink3);font-size:12px">${fmtSize(it.size)}</span></button>`).join('')
+      || '<div style="padding:10px;color:var(--ink3);font-size:13px">这里没有文件</div>';
+    $('#pkTree')._items = items;
+  };
+  setTimeout(() => { load(cur).catch(fail);
+    const h = e => { const d = e.target.closest('[data-pk]'); if(d) return load(d.dataset.pk).catch(fail);
+      const f = e.target.closest('[data-pf]'); if(f){ const it = $('#pkTree')._items.find(x=>x.path===f.dataset.pf); picked.has(it.path) ? picked.delete(it.path) : picked.set(it.path, it);
+        f.classList.toggle('on'); f.querySelector('.ck').classList.toggle('on'); $('#pkOk').textContent = picked.size ? `添加 ${picked.size} 个` : '添加' } };
+    $('#pkTree').onclick = h; $('#pkCrumbs').onclick = h }, 0);
+  const ok = await dialog(html, () => true);
+  if(ok && picked.size) sendToConverter([...picked.values()]);
+}
+
+init().catch(e => { document.body.innerHTML = `<div class="empty"><b>无法连接 MiniBox</b>${esc(e.message)}</div>` });
+</script>
+</body>
+</html>
